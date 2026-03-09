@@ -275,8 +275,8 @@ updatedAt        Date    (auto)
 
 ## 👨‍💻 Author
 
-**Divya**
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
+**Divyansh**
+- GitHub: DivyanshSo(https://github.com/DivyanshSo)
 
 ---
 
