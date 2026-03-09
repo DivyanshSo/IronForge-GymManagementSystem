@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRONFORGE GYM — Forge Your Legacy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --card: #181818;
+    --border: #2a2a2a;
+    --orange: #ff5c00;
+    --orange-light: #ff7a2e;
+    --gold: #c8a84b;
+    --white: #f5f0e8;
+    --muted: #888;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 999;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--white); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+  .nav-cta {
+    background: var(--orange);
+    color: var(--black) !important;
+    padding: 8px 20px;
+    font-weight: 700 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--orange-light) !important; color: var(--black) !important; }
+
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 24px; height: 2px; background: var(--white); display: block; transition: 0.3s; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0800 60%, #0a0a0a 100%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,92,0,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,92,0,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-glow {
+    position: absolute; top: 20%; right: -10%;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,92,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 0 5%; max-width: 900px;
+    margin-top: 64px;
+  }
+  .hero-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; letter-spacing: 5px;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-tag::before { content: ''; width: 40px; height: 1px; background: var(--orange); }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 4px;
+  }
+  h1 .line2 { color: var(--orange); display: block; }
+  .hero-sub {
+    font-size: 1.1rem; font-weight: 300;
+    color: var(--muted); max-width: 480px;
+    line-height: 1.7; margin: 2rem 0 3rem;
+  }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--orange); color: var(--black);
+    padding: 14px 36px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: transform 0.2s, background 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn-primary:hover { background: var(--orange-light); transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; color: var(--white);
+    padding: 14px 36px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; border: 1px solid var(--border);
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+  .hero-stats {
+    position: absolute; bottom: 3rem; right: 5%;
+    display: flex; gap: 3rem;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem; color: var(--orange); line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem; letter-spacing: 2px; color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── SECTIONS COMMON ── */
+  section { padding: 100px 5%; }
+  .section-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; letter-spacing: 5px;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-tag::before { content: ''; width: 30px; height: 1px; background: var(--orange); }
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: 3px; line-height: 1;
+    margin-bottom: 2rem;
+  }
+  h2 em { color: var(--orange); font-style: normal; }
+
+  /* ── MEMBERSHIPS ── */
+  #membership { background: var(--dark); }
+  .plans-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px; margin-top: 3rem;
+  }
+  .plan {
+    background: var(--card); padding: 2.5rem;
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .plan:hover { transform: translateY(-4px); border-color: var(--orange); }
+  .plan.featured { border-color: var(--orange); }
+  .plan.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute; top: 1.2rem; right: -2rem;
+    background: var(--orange); color: var(--black);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+    padding: 4px 3rem; transform: rotate(45deg);
+  }
+  .plan-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .plan-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: var(--white); line-height: 1;
+  }
+  .plan-price span { font-size: 1.5rem; color: var(--orange); }
+  .plan-period { font-size: 0.85rem; color: var(--muted); margin-bottom: 2rem; }
+  .plan-features { list-style: none; margin-bottom: 2rem; }
+  .plan-features li {
+    padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.9rem; color: var(--muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .plan-features li::before { content: '→'; color: var(--orange); font-weight: bold; }
+  .plan-features li.active { color: var(--white); }
+  .plan-btn {
+    width: 100%; padding: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; border: 1px solid var(--orange);
+    background: transparent; color: var(--orange);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .plan-btn:hover, .plan.featured .plan-btn {
+    background: var(--orange); color: var(--black);
+  }
+
+  /* ── EXERCISE FINDER ── */
+  #exercises { background: var(--black); }
+  .finder-wrap { margin-top: 3rem; }
+  .finder-filters {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+  .filter-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  select {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--white); padding: 12px 16px;
+    font-family: 'Barlow', sans-serif; font-size: 0.9rem;
+    appearance: none; cursor: pointer;
+    outline: none; transition: border-color 0.2s;
+  }
+  select:focus { border-color: var(--orange); }
+  .find-btn {
+    align-self: flex-end; padding: 13px 32px;
+    background: var(--orange); border: none;
+    color: var(--black); font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    transition: background 0.2s; white-space: nowrap;
+    min-width: 140px;
+  }
+  .find-btn:hover { background: var(--orange-light); }
+  #exercise-results { display: none; }
+  .result-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; color: var(--orange);
+    letter-spacing: 2px; margin-bottom: 2rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+  }
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .exercise-card {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 1.8rem; transition: border-color 0.3s, transform 0.3s;
+  }
+  .exercise-card:hover { border-color: var(--orange); transform: translateY(-3px); }
+  .ex-category {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 0.5rem;
+  }
+  .ex-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem; font-weight: 700; letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+  }
+  .ex-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+  .ex-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .ex-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem; letter-spacing: 1px;
+    background: rgba(255,92,0,0.1); color: var(--orange);
+    padding: 4px 10px; border: 1px solid rgba(255,92,0,0.3);
+  }
+  .ex-sets { font-size: 0.8rem; color: var(--muted); margin-top: 0.8rem; }
+  .ex-sets strong { color: var(--white); }
+
+  /* ── REGISTER ── */
+  #register {
+    background: linear-gradient(135deg, var(--dark) 0%, #1a0800 50%, var(--dark) 100%);
+    position: relative; overflow: hidden;
+  }
+  #register::before {
+    content: 'REGISTER';
+    position: absolute; right: -2%;
+    top: 50%; transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18vw; color: rgba(255,92,0,0.03);
+    letter-spacing: 10px; pointer-events: none;
+  }
+  .register-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: start; position: relative; z-index: 2;
+  }
+  .register-info h2 { margin-bottom: 1rem; }
+  .register-info p { color: var(--muted); line-height: 1.8; margin-bottom: 2rem; }
+  .perks { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+  .perks li {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.05rem; letter-spacing: 1px;
+  }
+  .perk-icon {
+    width: 36px; height: 36px; background: rgba(255,92,0,0.15);
+    border: 1px solid rgba(255,92,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .register-form { background: var(--card); border: 1px solid var(--border); padding: 2.5rem; }
+  .form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 2px; margin-bottom: 2rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.2rem; }
+  .form-group label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .form-group input,
+  .form-group select {
+    background: var(--dark); border: 1px solid var(--border);
+    color: var(--white); padding: 12px 16px;
+    font-family: 'Barlow', sans-serif; font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .form-group input:focus,
+  .form-group select:focus { border-color: var(--orange); }
+  .form-group input::placeholder { color: #444; }
+  .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .radio-opt { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .radio-opt input[type="radio"] { accent-color: var(--orange); }
+  .radio-opt span { font-size: 0.85rem; color: var(--muted); }
+  .submit-btn {
+    width: 100%; padding: 16px;
+    background: var(--orange); border: none;
+    color: var(--black); font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; cursor: pointer;
+    transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--orange-light); }
+  .form-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 1rem; }
+
+  /* Success message */
+  #success-msg {
+    display: none; background: var(--card);
+    border: 1px solid var(--orange);
+    padding: 2.5rem; text-align: center;
+  }
+  .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .success-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; color: var(--orange); letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+  .success-sub { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); border-top: 1px solid var(--border);
+    padding: 3rem 5%; text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; letter-spacing: 4px; color: var(--orange);
+    margin-bottom: 1rem; display: block;
+  }
+  .footer-logo span { color: var(--white); }
+  .footer-links { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .footer-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--orange); }
+  .footer-copy { font-size: 0.8rem; color: #444; }
+
+  /* ── MOBILE NAV ── */
+  .mobile-menu {
+    display: none; position: fixed; top: 64px; left: 0; right: 0;
+    background: var(--dark); border-bottom: 1px solid var(--border);
+    padding: 1.5rem 5%; z-index: 998; flex-direction: column; gap: 1.2rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+    text-decoration: none;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-content > * {
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-content > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-content > *:nth-child(2) { animation-delay: 0.25s; }
+  .hero-content > *:nth-child(3) { animation-delay: 0.4s; }
+  .hero-content > *:nth-child(4) { animation-delay: 0.55s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero-stats { display: none; }
+    .register-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 0 4%; }
+    section { padding: 70px 4%; }
+    .hero-content { padding: 0 4%; }
+  }
+
+  /* ── LOGIN MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .login-modal {
+    background: var(--card); border: 1px solid var(--border);
+    width: 100%; max-width: 430px; padding: 2.5rem;
+    position: relative; margin: 1rem;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform:translateY(-18px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1.2rem;
+    background: none; border: none; color: var(--muted);
+    font-size: 1.4rem; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--white); }
+  .modal-logo { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:3px; color:var(--orange); }
+  .modal-logo span { color: var(--white); }
+  .modal-sub { font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+  .modal-tabs { display:flex; border-bottom:1px solid var(--border); margin:1.4rem 0 1.8rem; }
+  .modal-tab {
+    flex:1; padding:10px; background:none; border:none;
+    font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:700;
+    letter-spacing:3px; text-transform:uppercase; color:var(--muted); cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.2s;
+  }
+  .modal-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+  .modal-form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:1rem; }
+  .modal-form-group label { font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+  .modal-form-group input, .modal-form-group select {
+    background:var(--dark); border:1px solid var(--border); color:var(--white);
+    padding:11px 14px; font-family:'Barlow',sans-serif; font-size:0.9rem;
+    outline:none; transition:border-color 0.2s; width:100%;
+  }
+  .modal-form-group input:focus, .modal-form-group select:focus { border-color:var(--orange); }
+  .modal-form-group input::placeholder { color:#333; }
+  .modal-form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+  .modal-btn {
+    width:100%; padding:13px; background:var(--orange); border:none;
+    color:var(--black); font-family:'Barlow Condensed',sans-serif;
+    font-size:0.95rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+    cursor:pointer; transition:background 0.2s; margin-top:0.4rem;
+  }
+  .modal-btn:hover { background:var(--orange-light); }
+  .modal-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .modal-error { background:rgba(255,60,60,0.1); border:1px solid rgba(255,60,60,0.3); color:#ff8080; padding:9px 12px; font-size:0.8rem; margin-bottom:1rem; display:none; }
+  .modal-success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#6ee7a0; padding:9px 12px; font-size:0.8rem; margin-bottom:1rem; display:none; }
+  .modal-note { font-size:0.72rem; color:var(--muted); text-align:center; margin-top:1rem; }
+
+  /* ── NAV LOGIN BUTTON ── */
+  .nav-login-btn {
+    font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; background:none;
+    border:1px solid var(--border); color:var(--muted); padding:7px 16px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .nav-login-btn:hover { border-color:var(--orange); color:var(--orange); }
+
+  /* ── NAV USER CHIP (after login) ── */
+  .nav-user { display:none; align-items:center; gap:8px; position:relative; }
+  .nav-user.visible { display:flex; }
+  .nav-avatar {
+    width:30px; height:30px; background:var(--orange);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue',sans-serif; font-size:0.95rem; color:var(--black);
+    cursor:pointer; flex-shrink:0; transition:background 0.2s;
+  }
+  .nav-avatar:hover { background:var(--orange-light); }
+  .nav-user-name {
+    font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; font-weight:700;
+    letter-spacing:1px; color:var(--white); cursor:pointer; transition:color 0.2s; white-space:nowrap;
+  }
+  .nav-user-name:hover { color:var(--orange); }
+  .nav-dropdown {
+    position:absolute; top:calc(100% + 14px); right:0;
+    background:var(--card); border:1px solid var(--border); min-width:190px;
+    z-index:1001; display:none; flex-direction:column;
+    box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:modalIn 0.2s ease;
+  }
+  .nav-dropdown.open { display:flex; }
+  .nav-dropdown::before {
+    content:''; position:absolute; top:-6px; right:12px;
+    width:10px; height:10px; background:var(--card);
+    border-left:1px solid var(--border); border-top:1px solid var(--border);
+    transform:rotate(45deg);
+  }
+  .dd-header { padding:10px 16px 4px; font-size:0.7rem; color:#444; font-family:'Barlow Condensed',sans-serif; letter-spacing:2px; text-transform:uppercase; }
+  .dd-item {
+    padding:10px 16px; font-family:'Barlow Condensed',sans-serif;
+    font-size:0.82rem; font-weight:600; letter-spacing:1px;
+    color:var(--muted); cursor:pointer; text-decoration:none;
+    transition:all 0.2s; display:block; border-bottom:1px solid var(--border);
+  }
+  .dd-item:last-child { border-bottom:none; }
+  .dd-item:hover { color:var(--orange); background:rgba(255,92,0,0.05); padding-left:20px; }
+  .dd-item.dd-logout { color:#ff6b6b; }
+  .dd-item.dd-logout:hover { color:#ff4444; background:rgba(255,60,60,0.05); }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">IRON<span>FORGE</span></a>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#membership">Membership</a></li>
+    <li><a href="#exercises">Exercises</a></li>
+    <li><a href="#register" class="nav-cta">Join Now</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:12px">
+    <!-- LOGIN BUTTON (shown when logged out) -->
+    <button class="nav-login-btn" id="nav-login-btn" onclick="openLoginModal()">Login</button>
+    <!-- USER CHIP (shown when logged in) -->
+    <div class="nav-user" id="nav-user" onclick="toggleDropdown()">
+      <div class="nav-avatar" id="nav-avatar">R</div>
+      <span class="nav-user-name" id="nav-user-name">Member</span>
+      <span style="color:var(--muted);font-size:0.7rem">▾</span>
+      <div class="nav-dropdown" id="nav-dropdown">
+        <div class="dd-header" id="dd-plan-label">Elite Plan</div>
+        <a class="dd-item" href="member-portal.html">🏋️ My Dashboard</a>
+        <a class="dd-item" href="member-portal.html">📊 My Progress</a>
+        <a class="dd-item" href="member-portal.html">💳 Membership</a>
+        <a class="dd-item dd-logout" onclick="navLogout()">⏻ Logout</a>
+      </div>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#hero" onclick="toggleMenu()">Home</a>
+  <a href="#membership" onclick="toggleMenu()">Membership</a>
+  <a href="#exercises" onclick="toggleMenu()">Exercises</a>
+  <a href="#register" onclick="toggleMenu()">Join Now</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Est. 2015 · Premium Fitness</div>
+    <h1>FORGE<span class="line2">YOUR</span>LEGACY</h1>
+    <p class="hero-sub">Where iron meets ambition. World-class equipment, expert coaching, and a community that pushes you beyond limits you thought were permanent.</p>
+    <div class="hero-btns">
+      <a href="#register" class="btn-primary">Start Today</a>
+      <a href="#exercises" class="btn-outline">Find Your Workout</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">2K+</div><div class="stat-label">Members</div></div>
+    <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Trainers</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Access</div></div>
+  </div>
+</section>
+
+<!-- MEMBERSHIP -->
+<section id="membership">
+  <div class="section-tag">Choose Your Plan</div>
+  <h2>MEMBERSHIP <em>PLANS</em></h2>
+  <div class="plans-grid">
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><span>₹</span>999</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li class="active">Gym floor access</li>
+        <li class="active">Basic equipment use</li>
+        <li class="active">Locker room access</li>
+        <li>Group classes</li>
+        <li>Personal trainer</li>
+        <li>Diet consultation</li>
+      </ul>
+      <button class="plan-btn" onclick="scrollToRegister('Starter')">Choose Starter</button>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Elite</div>
+      <div class="plan-price"><span>₹</span>1,999</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li class="active">Gym floor access</li>
+        <li class="active">All equipment</li>
+        <li class="active">Locker room access</li>
+        <li class="active">Unlimited group classes</li>
+        <li class="active">2 PT sessions/month</li>
+        <li>Diet consultation</li>
+      </ul>
+      <button class="plan-btn" onclick="scrollToRegister('Elite')">Choose Elite</button>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><span>₹</span>3,499</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li class="active">Gym floor access</li>
+        <li class="active">All equipment + sauna</li>
+        <li class="active">Locker room + towel</li>
+        <li class="active">Unlimited group classes</li>
+        <li class="active">8 PT sessions/month</li>
+        <li class="active">Diet consultation</li>
+      </ul>
+      <button class="plan-btn" onclick="scrollToRegister('Pro')">Choose Pro</button>
+    </div>
+  </div>
+</section>
+
+<!-- EXERCISE FINDER -->
+<section id="exercises">
+  <div class="section-tag">Workout Guide</div>
+  <h2>FIND YOUR <em>WORKOUT</em></h2>
+  <div class="finder-wrap">
+    <div class="finder-filters">
+      <div class="filter-group">
+        <span class="filter-label">Goal</span>
+        <select id="f-goal">
+          <option value="">Select Goal</option>
+          <option value="weight-loss">Weight Loss</option>
+          <option value="muscle-gain">Muscle Gain</option>
+          <option value="strength">Strength</option>
+          <option value="endurance">Endurance</option>
+          <option value="flexibility">Flexibility & Mobility</option>
+          <option value="general">General Fitness</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Experience</span>
+        <select id="f-level">
+          <option value="">Select Level</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Muscle Group</span>
+        <select id="f-muscle">
+          <option value="">All Muscles</option>
+          <option value="chest">Chest</option>
+          <option value="back">Back</option>
+          <option value="legs">Legs</option>
+          <option value="shoulders">Shoulders</option>
+          <option value="arms">Arms</option>
+          <option value="core">Core</option>
+          <option value="full">Full Body</option>
+        </select>
+      </div>
+      <button class="find-btn" onclick="findExercises()">🔍 Find Exercises</button>
+    </div>
+    <div id="exercise-results">
+      <div class="result-header" id="result-title"></div>
+      <div class="exercise-grid" id="exercise-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="register">
+  <div class="register-layout">
+    <div class="register-info">
+      <div class="section-tag">Get Started</div>
+      <h2>JOIN THE <em>FORGE</em></h2>
+      <p>Take the first step. Fill in the form and our team will reach out within 24 hours to confirm your membership and schedule your free orientation session.</p>
+      <ul class="perks">
+        <li><div class="perk-icon">🏋️</div> Free first week trial</li>
+        <li><div class="perk-icon">📋</div> Personalized fitness assessment</li>
+        <li><div class="perk-icon">👨‍🏫</div> One complimentary PT session</li>
+        <li><div class="perk-icon">🥗</div> Nutrition starter guide</li>
+        <li><div class="perk-icon">📱</div> IronForge App access</li>
+      </ul>
+    </div>
+    <div>
+      <div class="register-form" id="register-form">
+        <div class="form-title">MEMBERSHIP REGISTRATION</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="fname" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="lname" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="john@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="phone" placeholder="+91 98765 43210" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="age" placeholder="25" min="16" max="80">
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="gender">
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Non-binary</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" id="password" placeholder="Min. 8 characters" required>
+        </div>
+        <div class="form-group">
+          <label>Fitness Goal *</label>
+          <select id="goal">
+            <option value="">Select your primary goal</option>
+            <option>Weight Loss</option>
+            <option>Muscle Gain</option>
+            <option>Increase Strength</option>
+            <option>Improve Endurance</option>
+            <option>Flexibility & Mobility</option>
+            <option>General Health & Fitness</option>
+            <option>Sports Performance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Membership Plan *</label>
+          <select id="plan">
+            <option value="">Select a plan</option>
+            <option value="Starter">Starter — ₹999/month</option>
+            <option value="Elite">Elite — ₹1,999/month</option>
+            <option value="Pro">Pro — ₹3,499/month</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Experience Level</label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="level" value="Beginner"> <span>Beginner</span></label>
+            <label class="radio-opt"><input type="radio" name="level" value="Intermediate"> <span>Intermediate</span></label>
+            <label class="radio-opt"><input type="radio" name="level" value="Advanced"> <span>Advanced</span></label>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="registerMember()">FORGE MY MEMBERSHIP →</button>
+        <p class="form-note">By registering, you agree to our Terms of Service. No spam, ever.</p>
+      </div>
+      <div id="success-msg">
+        <div class="success-icon">🔥</div>
+        <div class="success-title">YOU'RE IN!</div>
+        <p class="success-sub" id="success-text"></p>
+        <br>
+        <p class="success-sub">Our team will contact you within 24 hours to confirm your membership and schedule your free orientation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">IRON<span>FORGE</span></span>
+  <div class="footer-links">
+    <a href="#hero">Home</a>
+    <a href="#membership">Membership</a>
+    <a href="#exercises">Exercises</a>
+    <a href="#register">Join</a>
+  </div>
+  <p class="footer-copy">© 2025 IronForge Gym. All rights reserved. Built for those who refuse to quit.</p>
+</footer>
+
+<script>
+// ── LOGIN MODAL LOGIC ──
+const API_BASE_URL = 'http://localhost:5000/api';
+
+function openLoginModal() {
+  // If already logged in, go to portal
+  const user = localStorage.getItem('igf_user');
+  if (user) { window.location.href = 'member-portal.html'; return; }
+  document.getElementById('login-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('ml-email').focus(), 200);
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('login-modal-overlay')) closeLoginModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLoginModal(); });
+
+function switchModalTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('modal-login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('modal-signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+}
+
+function showModalErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function showModalOk(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ── DEMO USERS ──
+const DEMO_USERS_NAV = {
+  'member@demo.com': {
+    password: 'demo1234',
+    data: {
+      _id: 'demo001', memberId: 'IGF-DEMO-MBR1',
+      firstName: 'Rahul', lastName: 'Sharma',
+      email: 'member@demo.com', fitnessGoal: 'Muscle Gain',
+      membershipPlan: 'Elite', experienceLevel: 'Intermediate',
+      membershipStatus: 'active', role: 'member',
+    }
+  }
+};
+
+async function doModalLogin() {
+  const email = document.getElementById('ml-email').value.trim();
+  const pass  = document.getElementById('ml-pass').value;
+  if (!email || !pass) { showModalErr('login-err', 'Please enter email and password.'); return; }
+
+  const btn = document.getElementById('ml-btn');
+  btn.textContent = 'LOADING...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('igf_token', data.token);
+      localStorage.setItem('igf_user', JSON.stringify(data.data));
+      onLoginSuccess(data.data);
+      return;
+    }
+  } catch (e) { /* backend offline, try demo */ }
+
+  // Demo fallback
+  const demo = DEMO_USERS_NAV[email];
+  if (demo && demo.password === pass) {
+    localStorage.setItem('igf_user', JSON.stringify(demo.data));
+    onLoginSuccess(demo.data);
+    return;
+  }
+
+  showModalErr('login-err', 'Invalid credentials. Try the demo login below.');
+  btn.textContent = 'ENTER THE FORGE →'; btn.disabled = false;
+}
+
+async function doModalSignup() {
+  const fname = document.getElementById('ms-fname').value.trim();
+  const lname = document.getElementById('ms-lname').value.trim();
+  const email = document.getElementById('ms-email').value.trim();
+  const pass  = document.getElementById('ms-pass').value;
+  const phone = document.getElementById('ms-phone').value.trim();
+  const plan  = document.getElementById('ms-plan').value;
+  const goal  = document.getElementById('ms-goal').value;
+
+  if (!fname || !lname || !email || !pass || !phone) {
+    showModalErr('signup-err', 'Please fill all required fields.'); return;
+  }
+  if (pass.length < 8) { showModalErr('signup-err', 'Password must be at least 8 characters.'); return; }
+
+  const btn = document.getElementById('ms-btn');
+  btn.textContent = 'CREATING...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName: fname, lastName: lname, email, password: pass, phone, fitnessGoal: goal, membershipPlan: plan })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('igf_token', data.token);
+      localStorage.setItem('igf_user', JSON.stringify(data.data));
+      onLoginSuccess(data.data);
+      return;
+    } else {
+      showModalErr('signup-err', data.message || 'Registration failed.');
+    }
+  } catch (e) {
+    // Demo mode fallback
+    const newUser = {
+      _id: 'local_' + Date.now(),
+      memberId: 'IGF-' + Math.random().toString(36).substr(2,6).toUpperCase(),
+      firstName: fname, lastName: lname, email,
+      fitnessGoal: goal, membershipPlan: plan,
+      experienceLevel: 'Beginner', membershipStatus: 'pending', role: 'member',
+    };
+    localStorage.setItem('igf_user', JSON.stringify(newUser));
+    onLoginSuccess(newUser);
+    return;
+  }
+
+  btn.textContent = 'CREATE ACCOUNT →'; btn.disabled = false;
+}
+
+function onLoginSuccess(user) {
+  closeLoginModal();
+  updateNavUser(user);
+  // Redirect to portal after short delay
+  setTimeout(() => { window.location.href = 'member-portal.html'; }, 600);
+}
+
+function updateNavUser(user) {
+  if (!user) return;
+  const initials = (user.firstName[0] + (user.lastName ? user.lastName[0] : '')).toUpperCase();
+  document.getElementById('nav-avatar').textContent = initials;
+  document.getElementById('nav-user-name').textContent = user.firstName;
+  document.getElementById('dd-plan-label').textContent = (user.membershipPlan || 'Member') + ' Plan';
+  document.getElementById('nav-login-btn').style.display = 'none';
+  document.getElementById('nav-user').classList.add('visible');
+}
+
+function toggleDropdown() {
+  document.getElementById('nav-dropdown').classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+  const userEl = document.getElementById('nav-user');
+  if (userEl && !userEl.contains(e.target)) {
+    document.getElementById('nav-dropdown').classList.remove('open');
+  }
+});
+
+function navLogout() {
+  localStorage.removeItem('igf_token');
+  localStorage.removeItem('igf_user');
+  document.getElementById('nav-login-btn').style.display = 'block';
+  document.getElementById('nav-user').classList.remove('visible');
+  document.getElementById('nav-dropdown').classList.remove('open');
+}
+
+// ── AUTO-RESTORE SESSION ON PAGE LOAD ──
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = localStorage.getItem('igf_user');
+  if (stored) {
+    try { updateNavUser(JSON.parse(stored)); } catch(e) { localStorage.removeItem('igf_user'); }
+  }
+});
+
+// ── MOBILE MENU ──
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+
+// ── SCROLL TO REGISTER WITH PLAN ──
+function scrollToRegister(plan) {
+  document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => {
+    const planSelect = document.getElementById('plan');
+    if (planSelect) {
+      for (let i = 0; i < planSelect.options.length; i++) {
+        if (planSelect.options[i].value === plan) {
+          planSelect.selectedIndex = i; break;
+        }
+      }
+    }
+  }, 600);
+}
+
+// ── EXERCISE DATABASE ──
+const exercises = [
+  // WEIGHT LOSS
+  { name: 'Burpees', category: 'Cardio / Full Body', goal: ['weight-loss','general','endurance'], level: ['beginner','intermediate','advanced'], muscle: ['full'], desc: 'Full-body explosive movement combining a squat, push-up, and jump. Burns maximum calories in minimum time.', sets: '4 sets × 15 reps', tags: ['High Intensity', 'Calorie Burner'] },
+  { name: 'Jump Rope', category: 'Cardio', goal: ['weight-loss','endurance','general'], level: ['beginner','intermediate','advanced'], muscle: ['full','legs'], desc: 'Classic cardio that elevates heart rate rapidly, improves coordination, and torches calories.', sets: '5 rounds × 2 min', tags: ['Cardio', 'Low Cost'] },
+  { name: 'Mountain Climbers', category: 'Core / Cardio', goal: ['weight-loss','general','endurance'], level: ['beginner','intermediate'], muscle: ['core','full'], desc: 'Dynamic core exercise that also elevates your heart rate and engages the entire body.', sets: '4 sets × 30 sec', tags: ['Core', 'Cardio'] },
+  { name: 'Cycling (Stationary)', category: 'Cardio', goal: ['weight-loss','endurance'], level: ['beginner','intermediate','advanced'], muscle: ['legs','full'], desc: 'Low-impact steady-state cardio ideal for fat burning without joint stress.', sets: '30–45 min steady pace', tags: ['Low Impact', 'Fat Burn'] },
+  { name: 'HIIT Sprints', category: 'Cardio / HIIT', goal: ['weight-loss','endurance'], level: ['intermediate','advanced'], muscle: ['legs','full'], desc: 'Alternating high-intensity sprints with rest periods — maximum fat burn in short duration.', sets: '8 rounds: 20s sprint / 40s rest', tags: ['HIIT', 'Advanced Cardio'] },
+
+  // MUSCLE GAIN
+  { name: 'Barbell Bench Press', category: 'Chest', goal: ['muscle-gain','strength'], level: ['intermediate','advanced'], muscle: ['chest','shoulders','arms'], desc: 'The king of chest exercises. Builds mass and strength across the entire chest with shoulder and tricep involvement.', sets: '4 sets × 8–10 reps', tags: ['Compound', 'Heavy'] },
+  { name: 'Deadlift', category: 'Back / Full Body', goal: ['muscle-gain','strength'], level: ['intermediate','advanced'], muscle: ['back','legs','full'], desc: 'The ultimate full-body compound lift. Builds posterior chain strength and total-body muscle mass.', sets: '4 sets × 5–6 reps', tags: ['Compound', 'Heavy Lift'] },
+  { name: 'Barbell Back Squat', category: 'Legs', goal: ['muscle-gain','strength'], level: ['intermediate','advanced'], muscle: ['legs','full'], desc: 'King of leg exercises. Builds quads, hamstrings, glutes, and core simultaneously.', sets: '4 sets × 8 reps', tags: ['Compound', 'Leg Mass'] },
+  { name: 'Pull-Ups / Chin-Ups', category: 'Back / Biceps', goal: ['muscle-gain','strength','general'], level: ['intermediate','advanced'], muscle: ['back','arms'], desc: 'Supreme bodyweight move for upper back width and bicep development. Add weight for progression.', sets: '4 sets × max reps', tags: ['Bodyweight', 'Back Width'] },
+  { name: 'Dumbbell Shoulder Press', category: 'Shoulders', goal: ['muscle-gain','strength'], level: ['beginner','intermediate','advanced'], muscle: ['shoulders','arms'], desc: 'Builds shoulder mass and stability. More range of motion than barbell variants.', sets: '4 sets × 10–12 reps', tags: ['Shoulder Mass', 'Stability'] },
+  { name: 'Dumbbell Flyes', category: 'Chest', goal: ['muscle-gain'], level: ['beginner','intermediate'], muscle: ['chest'], desc: 'Isolation move for chest development — stretches and contracts the pec muscles through a wide arc.', sets: '3 sets × 12–15 reps', tags: ['Isolation', 'Chest Stretch'] },
+
+  // STRENGTH
+  { name: 'Overhead Press (OHP)', category: 'Shoulders / Triceps', goal: ['strength','muscle-gain'], level: ['intermediate','advanced'], muscle: ['shoulders','arms'], desc: 'Standing barbell press overhead. One of the best upper body strength developers.', sets: '5 sets × 5 reps', tags: ['Compound', 'Strength'] },
+  { name: 'Romanian Deadlift', category: 'Hamstrings / Glutes', goal: ['strength','muscle-gain'], level: ['intermediate','advanced'], muscle: ['legs','back'], desc: 'Hip-hinge movement targeting the posterior chain. Critical for hamstring strength and injury prevention.', sets: '4 sets × 6–8 reps', tags: ['Hip Hinge', 'Posterior Chain'] },
+  { name: 'Farmers Walk', category: 'Full Body / Grip', goal: ['strength','endurance','general'], level: ['beginner','intermediate','advanced'], muscle: ['full'], desc: 'Loaded carry that builds grip, traps, core stability, and full-body functional strength.', sets: '4 sets × 30m walk', tags: ['Functional', 'Grip Strength'] },
+  { name: 'Box Squat', category: 'Legs', goal: ['strength'], level: ['beginner','intermediate','advanced'], muscle: ['legs'], desc: 'Squatting to a box teaches depth control and builds explosive leg power from a dead stop.', sets: '5 sets × 5 reps', tags: ['Power', 'Leg Strength'] },
+
+  // ENDURANCE
+  { name: 'Treadmill Intervals', category: 'Cardio', goal: ['endurance','weight-loss'], level: ['beginner','intermediate','advanced'], muscle: ['legs','full'], desc: 'Alternating walk-run or jog-sprint intervals to progressively build aerobic and anaerobic endurance.', sets: '20–40 min interval session', tags: ['Cardio', 'Progressive'] },
+  { name: 'Rowing Machine', category: 'Full Body / Cardio', goal: ['endurance','general','weight-loss'], level: ['beginner','intermediate','advanced'], muscle: ['full','back'], desc: 'Full-body low-impact cardio machine hitting both upper and lower body. Excellent for endurance and power.', sets: '4 × 500m or 20 min steady', tags: ['Full Body', 'Low Impact'] },
+  { name: 'Battle Ropes', category: 'Full Body / HIIT', goal: ['endurance','weight-loss'], level: ['beginner','intermediate','advanced'], muscle: ['full','shoulders','arms'], desc: 'High-intensity rope slams build endurance, power, and shoulder stamina simultaneously.', sets: '6 × 30 sec on / 30 sec off', tags: ['HIIT', 'Endurance'] },
+
+  // FLEXIBILITY
+  { name: 'Yoga Flow (Sun Salutation)', category: 'Flexibility / Mobility', goal: ['flexibility','general'], level: ['beginner','intermediate'], muscle: ['full'], desc: 'Dynamic sequence connecting breath to movement. Improves whole-body flexibility, balance, and mental focus.', sets: '5–10 rounds morning routine', tags: ['Mobility', 'Mindfulness'] },
+  { name: 'Hip Flexor Stretch', category: 'Flexibility', goal: ['flexibility','general'], level: ['beginner','intermediate','advanced'], muscle: ['legs'], desc: 'Deep lunge stretch targeting hip flexors — essential for anyone who sits for long periods.', sets: '3 × 60 sec each side', tags: ['Stretch', 'Posture'] },
+  { name: 'Foam Rolling (Full Body)', category: 'Recovery / Mobility', goal: ['flexibility','general'], level: ['beginner','intermediate','advanced'], muscle: ['full'], desc: 'Self-myofascial release technique to reduce muscle tightness and improve range of motion between sessions.', sets: '10–15 min post-workout', tags: ['Recovery', 'Soft Tissue'] },
+  { name: 'Cat-Cow Stretch', category: 'Spine / Core', goal: ['flexibility','general'], level: ['beginner'], muscle: ['core','back'], desc: 'Gentle spinal mobility movement that warms up the back, relieves tension, and improves posture.', sets: '3 × 10 slow cycles', tags: ['Spine Health', 'Beginner'] },
+
+  // GENERAL / BEGINNER
+  { name: 'Goblet Squat', category: 'Legs / Core', goal: ['general','muscle-gain','weight-loss'], level: ['beginner','intermediate'], muscle: ['legs','core'], desc: 'Beginner-friendly squat holding a dumbbell at chest height — teaches perfect squat mechanics.', sets: '3 sets × 12 reps', tags: ['Beginner Friendly', 'Technique'] },
+  { name: 'Dumbbell Row', category: 'Back', goal: ['general','muscle-gain','strength'], level: ['beginner','intermediate'], muscle: ['back','arms'], desc: 'Foundational back exercise. One arm at a time — builds thickness, posture, and pulling strength.', sets: '3 sets × 12 reps each side', tags: ['Back', 'Beginner'] },
+  { name: 'Push-Ups', category: 'Chest / Triceps / Shoulders', goal: ['general','muscle-gain','strength','endurance'], level: ['beginner','intermediate','advanced'], muscle: ['chest','shoulders','arms'], desc: 'The foundational bodyweight upper body exercise. Infinite variations to match any level.', sets: '4 sets × max reps', tags: ['Bodyweight', 'Anytime'] },
+  { name: 'Plank', category: 'Core', goal: ['general','strength','flexibility'], level: ['beginner','intermediate','advanced'], muscle: ['core','full'], desc: 'Isometric core exercise building deep stability muscles. Foundation for almost all compound lifts.', sets: '3 × 30–60 sec holds', tags: ['Core', 'Isometric'] },
+
+  // ARMS
+  { name: 'Barbell Bicep Curl', category: 'Biceps', goal: ['muscle-gain','strength'], level: ['beginner','intermediate','advanced'], muscle: ['arms'], desc: 'Classic mass-builder for the biceps. Use strict form to avoid shoulder involvement.', sets: '4 sets × 10–12 reps', tags: ['Isolation', 'Biceps'] },
+  { name: 'Tricep Dips', category: 'Triceps', goal: ['muscle-gain','strength','general'], level: ['beginner','intermediate','advanced'], muscle: ['arms','chest'], desc: 'Bodyweight or weighted tricep exercise. Builds the horseshoe shape and lockout strength.', sets: '4 sets × 12–15 reps', tags: ['Bodyweight', 'Triceps'] },
+  { name: 'Hammer Curls', category: 'Biceps / Forearms', goal: ['muscle-gain','strength'], level: ['beginner','intermediate','advanced'], muscle: ['arms'], desc: 'Neutral grip curl targeting the brachialis and brachioradialis for arm thickness and forearm strength.', sets: '3 sets × 12 reps', tags: ['Arms', 'Forearms'] },
+];
+
+function findExercises() {
+  const goal = document.getElementById('f-goal').value;
+  const level = document.getElementById('f-level').value;
+  const muscle = document.getElementById('f-muscle').value;
+
+  let filtered = exercises;
+  if (goal) filtered = filtered.filter(e => e.goal.includes(goal));
+  if (level) filtered = filtered.filter(e => e.level.includes(level));
+  if (muscle) filtered = filtered.filter(e => e.muscle.includes(muscle));
+
+  const resultDiv = document.getElementById('exercise-results');
+  const titleDiv = document.getElementById('result-title');
+  const gridDiv = document.getElementById('exercise-grid');
+
+  resultDiv.style.display = 'block';
+
+  if (filtered.length === 0) {
+    titleDiv.textContent = 'No exercises matched. Try different filters.';
+    gridDiv.innerHTML = '';
+    return;
+  }
+
+  const goalLabels = { 'weight-loss':'Weight Loss','muscle-gain':'Muscle Gain','strength':'Strength','endurance':'Endurance','flexibility':'Flexibility','general':'General Fitness','' : 'All Goals' };
+  titleDiv.textContent = `${filtered.length} Exercise${filtered.length > 1 ? 's' : ''} Found — ${goalLabels[goal] || 'All Goals'}${level ? ' · ' + level.charAt(0).toUpperCase() + level.slice(1) : ''}`;
+
+  gridDiv.innerHTML = filtered.map(ex => `
+    <div class="exercise-card">
+      <div class="ex-category">${ex.category}</div>
+      <div class="ex-name">${ex.name}</div>
+      <div class="ex-desc">${ex.desc}</div>
+      <div class="ex-sets">Recommended: <strong>${ex.sets}</strong></div>
+      <div class="ex-meta">${ex.tags.map(t => `<span class="ex-tag">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── API BASE URL — change to your server URL in production ──
+const API_BASE = 'http://localhost:5000/api';
+
+// ── REGISTRATION (connected to Node.js backend) ──
+async function registerMember() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const age = document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  const goal = document.getElementById('goal').value;
+  const plan = document.getElementById('plan').value;
+  const levelEl = document.querySelector('input[name="level"]:checked');
+  const level = levelEl ? levelEl.value : 'Beginner';
+
+  // Client-side validation
+  if (!fname || !lname || !email || !phone || !goal || !plan) {
+    showFormError('Please fill in all required fields (marked with *).'); return;
+  }
+  const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailReg.test(email)) {
+    showFormError('Please enter a valid email address.'); return;
+  }
+
+  // Password from form (add a password field)
+  const password = document.getElementById('password') ? document.getElementById('password').value : email + '@IronForge1';
+
+  const submitBtn = document.querySelector('.submit-btn');
+  submitBtn.textContent = 'REGISTERING...';
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: fname,
+        lastName: lname,
+        email, password, phone,
+        age: age ? Number(age) : undefined,
+        gender: gender || undefined,
+        fitnessGoal: goal,
+        membershipPlan: plan,
+        experienceLevel: level,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Save token to localStorage
+      if (data.token) localStorage.setItem('igf_token', data.token);
+
+      document.getElementById('register-form').style.display = 'none';
+      const successMsg = document.getElementById('success-msg');
+      successMsg.style.display = 'block';
+      document.getElementById('success-text').innerHTML =
+        `Welcome, <strong>${fname} ${lname}</strong>! Your <strong>${plan}</strong> membership is confirmed.<br>
+        <span style="color:var(--orange); font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:2px;">Member ID: ${data.data.memberId}</span><br>
+        <small style="color:var(--muted);">A confirmation email has been sent to ${email}</small>`;
+      successMsg.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      const msg = data.errors ? data.errors.map(e => e.msg).join(', ') : data.message;
+      showFormError(msg || 'Registration failed. Please try again.');
+      submitBtn.textContent = 'FORGE MY MEMBERSHIP →';
+      submitBtn.disabled = false;
+    }
+  } catch (error) {
+    // If backend not running, fall back gracefully
+    console.error('API Error:', error);
+    showFormError('Could not connect to server. Please check your connection or try again later.');
+    submitBtn.textContent = 'FORGE MY MEMBERSHIP →';
+    submitBtn.disabled = false;
+  }
+}
+
+function showFormError(msg) {
+  let el = document.getElementById('form-error');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'form-error';
+    el.style.cssText = 'background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.4);color:#ff6b6b;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;';
+    document.querySelector('.submit-btn').before(el);
+  }
+  el.textContent = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+<!-- ── LOGIN MODAL ── -->
+<div class="modal-overlay" id="login-modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="login-modal">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div class="modal-logo">IRON<span>FORGE</span></div>
+    <div class="modal-sub">Member Portal</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchModalTab('login')">Login</button>
+      <button class="modal-tab" id="tab-signup" onclick="switchModalTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="modal-login-form">
+      <div class="modal-error" id="login-err"></div>
+      <div class="modal-success" id="login-ok"></div>
+      <div class="modal-form-group">
+        <label>Email Address</label>
+        <input type="email" id="ml-email" placeholder="your@email.com">
+      </div>
+      <div class="modal-form-group">
+        <label>Password</label>
+        <input type="password" id="ml-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doModalLogin()">
+      </div>
+      <button class="modal-btn" id="ml-btn" onclick="doModalLogin()">ENTER THE FORGE →</button>
+      <p class="modal-note">Demo: email <strong style="color:var(--orange)">member@demo.com</strong> / pass <strong style="color:var(--orange)">demo1234</strong></p>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="modal-signup-form" style="display:none">
+      <div class="modal-error" id="signup-err"></div>
+      <div class="modal-form-row">
+        <div class="modal-form-group">
+          <label>First Name *</label>
+          <input type="text" id="ms-fname" placeholder="John">
+        </div>
+        <div class="modal-form-group">
+          <label>Last Name *</label>
+          <input type="text" id="ms-lname" placeholder="Doe">
+        </div>
+      </div>
+      <div class="modal-form-group">
+        <label>Email *</label>
+        <input type="email" id="ms-email" placeholder="john@email.com">
+      </div>
+      <div class="modal-form-group">
+        <label>Password *</label>
+        <input type="password" id="ms-pass" placeholder="Min. 8 characters">
+      </div>
+      <div class="modal-form-group">
+        <label>Phone *</label>
+        <input type="tel" id="ms-phone" placeholder="+91 98765 43210">
+      </div>
+      <div class="modal-form-row">
+        <div class="modal-form-group">
+          <label>Plan</label>
+          <select id="ms-plan">
+            <option value="Starter">Starter ₹999</option>
+            <option value="Elite" selected>Elite ₹1,999</option>
+            <option value="Pro">Pro ₹3,499</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label>Goal</label>
+          <select id="ms-goal">
+            <option value="Weight Loss">Weight Loss</option>
+            <option value="Muscle Gain">Muscle Gain</option>
+            <option value="Increase Strength">Strength</option>
+            <option value="Improve Endurance">Endurance</option>
+            <option value="General Health & Fitness">General</option>
+          </select>
+        </div>
+      </div>
+      <button class="modal-btn" id="ms-btn" onclick="doModalSignup()">CREATE ACCOUNT →</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

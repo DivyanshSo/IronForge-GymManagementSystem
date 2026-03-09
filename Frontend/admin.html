@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronForge — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --black: #070707;
+  --dark: #0f0f0f;
+  --card: #141414;
+  --card2: #1a1a1a;
+  --border: #222;
+  --orange: #ff5c00;
+  --orange2: #ff7a2e;
+  --gold: #c8a84b;
+  --white: #f0ebe0;
+  --muted: #666;
+  --green: #16a34a;
+  --green-light: #22c55e;
+  --red: #dc2626;
+  --red-light: #ef4444;
+  --blue: #3b82f6;
+  --yellow: #f59e0b;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{ background:var(--black); color:var(--white); font-family:'Barlow',sans-serif; }
+
+/* ── ADMIN LOGIN ── */
+#admin-login {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 30% 60%, rgba(255,92,0,0.06) 0%, transparent 60%), var(--black);
+}
+.login-card {
+  width:100%; max-width:400px; padding:0 1.5rem;
+  animation:fadeUp 0.5s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{
+  text-align:center; margin-bottom:2rem;
+  font-family:'Bebas Neue',sans-serif; font-size:2.5rem;
+  letter-spacing:4px; color:var(--orange);
+}
+.login-logo span{color:var(--white);}
+.login-logo p{ font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; letter-spacing:4px; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+.login-box{ background:var(--card); border:1px solid var(--border); padding:2rem; }
+.login-title{ font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
+.form-group{ display:flex; flex-direction:column; gap:6px; margin-bottom:1.2rem; }
+.form-group label{ font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+.form-group input{
+  background:var(--dark); border:1px solid var(--border); color:var(--white);
+  padding:11px 14px; font-family:'Barlow',sans-serif; font-size:0.9rem;
+  outline:none; transition:border-color 0.2s;
+}
+.form-group input:focus{ border-color:var(--orange); }
+.form-group input::placeholder{ color:#2a2a2a; }
+.login-btn{
+  width:100%; padding:13px; background:var(--orange); border:none;
+  color:var(--black); font-family:'Barlow Condensed',sans-serif;
+  font-size:0.9rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  cursor:pointer; transition:background 0.2s; margin-top:0.5rem;
+}
+.login-btn:hover{background:var(--orange2);}
+.login-err{ background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.3); color:#f87171; padding:10px 14px; font-size:0.82rem; margin-bottom:1rem; display:none; }
+.demo-note{ font-size:0.72rem; color:var(--muted); text-align:center; margin-top:1rem; }
+.demo-note span{ color:var(--orange); cursor:pointer; }
+
+/* ── DASHBOARD LAYOUT ── */
+#dashboard{ display:none; }
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:220px;
+  background:var(--dark); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:100;
+}
+.sidebar-logo{ padding:1.3rem 1.3rem 1rem; border-bottom:1px solid var(--border); }
+.sidebar-logo .logo{ font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:3px; color:var(--orange); }
+.sidebar-logo .logo span{ color:var(--white); }
+.sidebar-logo .role-tag{ font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; letter-spacing:3px; text-transform:uppercase; color:var(--orange); background:rgba(255,92,0,0.1); border:1px solid rgba(255,92,0,0.2); padding:2px 8px; display:inline-block; margin-top:4px; }
+.nav-section{ font-family:'Barlow Condensed',sans-serif; font-size:0.58rem; letter-spacing:3px; text-transform:uppercase; color:#333; padding:0.8rem 1.3rem 0.3rem; }
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:9px 1.3rem;
+  font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; font-weight:600; letter-spacing:1px;
+  color:var(--muted); cursor:pointer; border-left:3px solid transparent;
+  text-decoration:none; transition:all 0.2s;
+}
+.nav-item:hover{ color:var(--white); background:rgba(255,255,255,0.02); }
+.nav-item.active{ color:var(--orange); border-left-color:var(--orange); background:rgba(255,92,0,0.05); }
+.nav-item .ico{ font-size:1rem; width:20px; text-align:center; }
+.nav-badge{
+  margin-left:auto; background:var(--orange); color:var(--black);
+  font-size:0.6rem; font-weight:700; padding:2px 6px; border-radius:0;
+  font-family:'Barlow Condensed',sans-serif; letter-spacing:1px;
+}
+.sidebar-bottom{ margin-top:auto; padding:1rem 1.3rem; border-top:1px solid var(--border); }
+.admin-info{ display:flex; align-items:center; gap:8px; margin-bottom:0.7rem; }
+.admin-avatar{ width:34px; height:34px; background:var(--orange); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--black); }
+.admin-name{ font-size:0.85rem; font-weight:600; }
+.admin-role{ font-size:0.68rem; color:var(--muted); }
+.logout-btn{ width:100%; padding:8px; background:none; border:1px solid var(--border); color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+.logout-btn:hover{ border-color:var(--red-light); color:var(--red-light); }
+
+/* Main */
+.main{ margin-left:220px; padding:2rem 2.5rem; min-height:100vh; }
+.page{ display:none; animation:fadeUp 0.35s ease; }
+.page.active{ display:block; }
+.topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; }
+.page-title{ font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:3px; line-height:1; }
+.page-title em{ color:var(--orange); font-style:normal; }
+.page-sub{ font-size:0.82rem; color:var(--muted); margin-top:3px; }
+.topbar-right{ display:flex; align-items:center; gap:1rem; }
+.date-chip{ font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; letter-spacing:2px; color:var(--muted); background:var(--card); border:1px solid var(--border); padding:6px 14px; }
+
+/* KPI Cards */
+.kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; margin-bottom:2rem; }
+.kpi{
+  background:var(--card); border:1px solid var(--border); padding:1.3rem;
+  position:relative; overflow:hidden; transition:border-color 0.3s, transform 0.2s;
+}
+.kpi:hover{ border-color:var(--orange); transform:translateY(-2px); }
+.kpi-icon{ font-size:1.6rem; margin-bottom:8px; }
+.kpi-label{ font-family:'Barlow Condensed',sans-serif; font-size:0.62rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.kpi-val{ font-family:'Bebas Neue',sans-serif; font-size:2.8rem; line-height:1; }
+.kpi-val.orange{ color:var(--orange); }
+.kpi-val.green{ color:var(--green-light); }
+.kpi-val.gold{ color:var(--gold); }
+.kpi-val.blue{ color:var(--blue); }
+.kpi-change{ font-size:0.72rem; color:var(--muted); margin-top:5px; }
+.kpi-change.up{ color:var(--green-light); }
+.kpi-change.down{ color:var(--red-light); }
+.kpi-bar{ position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--border); }
+.kpi-bar-fill{ height:100%; background:var(--orange); transition:width 1s ease; }
+
+/* Cards */
+.card{ background:var(--card); border:1px solid var(--border); padding:1.4rem; margin-bottom:1.5rem; }
+.card-hdr{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; }
+.card-title{ font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+.card-action{ font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; letter-spacing:1px; color:var(--orange); cursor:pointer; background:none; border:none; }
+.card-action:hover{ text-decoration:underline; }
+
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+.three-col{ display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; }
+.chart-wrap{ height:220px; position:relative; }
+.chart-wrap-sm{ height:180px; position:relative; }
+
+/* Table */
+.tbl-wrap{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; }
+th{
+  font-family:'Barlow Condensed',sans-serif; font-size:0.62rem; letter-spacing:3px;
+  text-transform:uppercase; color:var(--muted); text-align:left;
+  padding:8px 12px; border-bottom:1px solid var(--border);
+}
+td{
+  padding:10px 12px; border-bottom:1px solid #1a1a1a;
+  font-size:0.85rem; vertical-align:middle;
+}
+tr:hover td{ background:rgba(255,255,255,0.02); }
+.td-name{ font-weight:600; }
+.td-id{ font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; color:var(--orange); letter-spacing:1px; }
+
+/* Badges */
+.badge{
+  display:inline-block; font-family:'Barlow Condensed',sans-serif;
+  font-size:0.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  padding:3px 8px; border:1px solid;
+}
+.badge-active{ color:var(--green-light); border-color:rgba(34,197,94,0.35); background:rgba(34,197,94,0.08); }
+.badge-pending{ color:var(--yellow); border-color:rgba(245,158,11,0.35); background:rgba(245,158,11,0.08); }
+.badge-expired{ color:var(--red-light); border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); }
+
+/* Plan pills */
+.plan-pill{
+  display:inline-block; font-family:'Barlow Condensed',sans-serif; font-size:0.65rem;
+  letter-spacing:1px; padding:2px 8px; font-weight:700;
+}
+.plan-pill.Starter{ color:var(--muted); border:1px solid #333; }
+.plan-pill.Elite{ color:var(--orange); border:1px solid rgba(255,92,0,0.3); }
+.plan-pill.Pro{ color:var(--gold); border:1px solid rgba(200,168,75,0.3); }
+
+/* Action buttons */
+.act-btn{
+  padding:4px 10px; font-family:'Barlow Condensed',sans-serif;
+  font-size:0.68rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; border:1px solid; transition:all 0.2s; background:none;
+}
+.act-btn.activate{ color:var(--green-light); border-color:rgba(34,197,94,0.3); }
+.act-btn.activate:hover{ background:rgba(34,197,94,0.1); }
+.act-btn.delete{ color:var(--red-light); border-color:rgba(239,68,68,0.3); }
+.act-btn.delete:hover{ background:rgba(239,68,68,0.1); }
+.act-btn.view{ color:var(--muted); border-color:var(--border); }
+.act-btn.view:hover{ color:var(--white); }
+
+/* Search & filter bar */
+.filter-bar{ display:flex; gap:0.8rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+.search-input{
+  background:var(--card2); border:1px solid var(--border); color:var(--white);
+  padding:9px 14px; font-family:'Barlow',sans-serif; font-size:0.85rem;
+  outline:none; flex:1; min-width:180px;
+}
+.search-input:focus{ border-color:var(--orange); }
+.filter-select{
+  background:var(--card2); border:1px solid var(--border); color:var(--white);
+  padding:9px 14px; font-family:'Barlow',sans-serif; font-size:0.85rem;
+  outline:none; cursor:pointer;
+}
+.filter-select:focus{ border-color:var(--orange); }
+.refresh-btn{
+  padding:9px 16px; background:var(--orange); border:none; color:var(--black);
+  font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:background 0.2s;
+}
+.refresh-btn:hover{ background:var(--orange2); }
+
+/* Revenue highlight */
+.revenue-big{
+  font-family:'Bebas Neue',sans-serif; font-size:3.5rem; color:var(--green-light);
+  letter-spacing:2px; line-height:1; margin-bottom:4px;
+}
+
+/* Donut center label */
+.donut-wrap{ position:relative; display:flex; align-items:center; justify-content:center; height:220px; }
+
+/* Progress bars */
+.prog-item{ margin-bottom:0.8rem; }
+.prog-hdr{ display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.8rem; }
+.prog-hdr span:last-child{ color:var(--orange); }
+.prog-track{ height:4px; background:var(--border); overflow:hidden; }
+.prog-fill{ height:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); transition:width 1.2s ease; }
+
+/* Notification badge */
+.n-dot{ width:8px; height:8px; background:var(--orange); border-radius:50%; margin-left:auto; }
+
+/* Recent activity */
+.activity-item{ display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #191919; }
+.activity-item:last-child{ border-bottom:none; }
+.act-icon{ width:36px; height:36px; background:rgba(255,92,0,0.1); border:1px solid rgba(255,92,0,0.2); display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+.act-title{ font-size:0.85rem; font-weight:600; }
+.act-meta{ font-size:0.72rem; color:var(--muted); margin-top:2px; }
+
+/* Detail modal */
+.modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:500; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open{ display:flex; }
+.modal{ background:var(--card); border:1px solid var(--border); padding:2rem; width:100%; max-width:500px; position:relative; animation:fadeUp 0.3s ease; }
+.modal-close{ position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--muted); font-size:1.2rem; cursor:pointer; }
+.modal-close:hover{ color:var(--white); }
+.modal-title{ font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:2px; margin-bottom:1.5rem; }
+.modal-field{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
+.modal-field span:first-child{ color:var(--muted); }
+.modal-field span:last-child{ font-weight:600; }
+.modal-actions{ display:flex; gap:0.8rem; margin-top:1.2rem; }
+
+/* Mobile */
+.ham{ display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--card); border:1px solid var(--border); padding:7px 9px; cursor:pointer; font-size:1.1rem; }
+.overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:99; }
+@media(max-width:1000px){
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  .two-col,.three-col{ grid-template-columns:1fr; }
+}
+@media(max-width:700px){
+  .sidebar{ transform:translateX(-100%); transition:transform 0.3s; }
+  .sidebar.open{ transform:translateX(0); }
+  .overlay.open{ display:block; }
+  .main{ margin-left:0; padding:1rem; }
+  .ham{ display:block; }
+  .kpi-grid{ grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login">
+  <div class="login-card">
+    <div class="login-logo">
+      IRON<span>FORGE</span>
+      <p>Admin Dashboard</p>
+    </div>
+    <div class="login-box">
+      <div class="login-title">Restricted Access — Admin Only</div>
+      <div class="login-err" id="admin-err"></div>
+      <div class="form-group">
+        <label>Admin Email</label>
+        <input type="email" id="adm-email" placeholder="admin@ironforge.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="login-btn" onclick="adminLogin()">ACCESS DASHBOARD</button>
+      <p class="demo-note">Demo: <span onclick="fillAdminDemo()">Fill demo credentials</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <button class="ham" onclick="toggleSidebar()">☰</button>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo">IRON<span>FORGE</span></div>
+      <div class="role-tag">Admin</div>
+    </div>
+    <nav style="flex:1;overflow-y:auto;padding:0.5rem 0">
+      <div class="nav-section">Main</div>
+      <a class="nav-item active" href="#" onclick="showPage('overview')"><span class="ico">📊</span> Overview</a>
+      <a class="nav-item" href="#" onclick="showPage('members')"><span class="ico">👥</span> Members <span class="nav-badge" id="pending-badge">3</span></a>
+      <a class="nav-item" href="#" onclick="showPage('revenue')"><span class="ico">💰</span> Revenue</a>
+      <div class="nav-section">Manage</div>
+      <a class="nav-item" href="#" onclick="showPage('analytics')"><span class="ico">📈</span> Analytics</a>
+      <a class="nav-item" href="#" onclick="showPage('activity')"><span class="ico">⚡</span> Activity</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin</div>
+          <div class="admin-role">Super Admin</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="adminLogout()">⏻ Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="topbar">
+        <div>
+          <div class="page-title">DASHBOARD <em>OVERVIEW</em></div>
+          <div class="page-sub" id="today-date"></div>
+        </div>
+        <div class="topbar-right">
+          <div class="date-chip" id="clock"></div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-label">Total Members</div>
+          <div class="kpi-val orange" id="kpi-total">247</div>
+          <div class="kpi-change up">↑ +12 this month</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-label">Active Members</div>
+          <div class="kpi-val green" id="kpi-active">198</div>
+          <div class="kpi-change up">↑ 80.2% of total</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:80%;background:var(--green-light)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon">⏳</div>
+          <div class="kpi-label">Pending Activation</div>
+          <div class="kpi-val" style="color:var(--yellow)" id="kpi-pending">3</div>
+          <div class="kpi-change down">↑ Needs attention</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:15%;background:var(--yellow)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-label">Est. Monthly Revenue</div>
+          <div class="kpi-val gold" id="kpi-rev">₹3.9L</div>
+          <div class="kpi-change up">↑ +8% vs last month</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:88%;background:var(--gold)"></div></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Member Growth — Last 6 Months</div>
+          </div>
+          <div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Plan Distribution</div>
+          </div>
+          <div class="chart-wrap"><canvas id="planChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Recent Registrations</div>
+            <button class="card-action" onclick="showPage('members')">View All →</button>
+          </div>
+          <div id="recent-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Goal Distribution</div>
+          </div>
+          <div id="goal-bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS PAGE -->
+    <div class="page" id="page-members">
+      <div class="topbar">
+        <div>
+          <div class="page-title">MEMBER <em>MANAGEMENT</em></div>
+          <div class="page-sub">Search, filter and manage all members</div>
+        </div>
+        <div class="topbar-right">
+          <button class="refresh-btn" onclick="loadMembers()">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="filter-bar">
+          <input class="search-input" id="search-input" placeholder="🔍  Search by name, email or ID..." oninput="filterMembers()">
+          <select class="filter-select" id="filter-status" onchange="filterMembers()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="expired">Expired</option>
+          </select>
+          <select class="filter-select" id="filter-plan" onchange="filterMembers()">
+            <option value="">All Plans</option>
+            <option value="Starter">Starter</option>
+            <option value="Elite">Elite</option>
+            <option value="Pro">Pro</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Member ID</th>
+                <th>Plan</th>
+                <th>Goal</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody"></tbody>
+          </table>
+        </div>
+        <div id="tbl-footer" style="padding:0.8rem 0;font-size:0.78rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <!-- REVENUE PAGE -->
+    <div class="page" id="page-revenue">
+      <div class="topbar">
+        <div>
+          <div class="page-title">REVENUE <em>OVERVIEW</em></div>
+          <div class="page-sub">Monthly membership revenue breakdown</div>
+        </div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi">
+          <div class="kpi-label">Monthly Revenue (Est.)</div>
+          <div class="revenue-big" id="rev-monthly">₹3,92,503</div>
+          <div class="kpi-change up">↑ +8.1% vs Feb</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Annual Revenue (Est.)</div>
+          <div class="kpi-val gold" style="font-size:2.2rem" id="rev-annual">₹47,10,036</div>
+          <div class="kpi-change up">↑ Projected</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Avg. Revenue / Member</div>
+          <div class="kpi-val orange" style="font-size:2.2rem">₹1,589</div>
+          <div class="kpi-change">Blended average</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Monthly Revenue — 2025–26</div></div>
+          <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Revenue by Plan</div></div>
+          <div style="padding:1rem 0" id="rev-plan-breakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page" id="page-analytics">
+      <div class="topbar">
+        <div>
+          <div class="page-title">DEEP <em>ANALYTICS</em></div>
+          <div class="page-sub">Member insights and trends</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">New Registrations / Month</div></div>
+          <div class="chart-wrap"><canvas id="regChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Experience Level Split</div></div>
+          <div class="chart-wrap"><canvas id="levelChart"></canvas></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Gender Distribution</div></div>
+          <div class="chart-wrap-sm"><canvas id="genderChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Membership Status Breakdown</div></div>
+          <div class="chart-wrap-sm"><canvas id="statusChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY PAGE -->
+    <div class="page" id="page-activity">
+      <div class="topbar">
+        <div>
+          <div class="page-title">RECENT <em>ACTIVITY</em></div>
+          <div class="page-sub">Latest member events and actions</div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="activity-feed"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MEMBER DETAIL MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-name">Member Details</div>
+    <div id="modal-fields"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+// ── DEMO DATA ──
+const DEMO_MEMBERS = [
+  { _id:'m1', memberId:'IGF-DEMO-001', firstName:'Rahul', lastName:'Sharma', email:'rahul@demo.com', phone:'+91 98765 43210', age:26, gender:'Male', fitnessGoal:'Muscle Gain', membershipPlan:'Elite', experienceLevel:'Intermediate', membershipStatus:'active', createdAt:'2026-02-15' },
+  { _id:'m2', memberId:'IGF-DEMO-002', firstName:'Priya', lastName:'Verma', email:'priya@demo.com', phone:'+91 91234 56789', age:23, gender:'Female', fitnessGoal:'Weight Loss', membershipPlan:'Starter', experienceLevel:'Beginner', membershipStatus:'active', createdAt:'2026-02-18' },
+  { _id:'m3', memberId:'IGF-DEMO-003', firstName:'Arjun', lastName:'Singh', email:'arjun@demo.com', phone:'+91 87654 32100', age:30, gender:'Male', fitnessGoal:'Increase Strength', membershipPlan:'Pro', experienceLevel:'Advanced', membershipStatus:'active', createdAt:'2026-01-10' },
+  { _id:'m4', memberId:'IGF-DEMO-004', firstName:'Neha', lastName:'Gupta', email:'neha@demo.com', phone:'+91 99887 76655', age:28, gender:'Female', fitnessGoal:'General Health & Fitness', membershipPlan:'Elite', experienceLevel:'Beginner', membershipStatus:'pending', createdAt:'2026-03-01' },
+  { _id:'m5', memberId:'IGF-DEMO-005', firstName:'Vikram', lastName:'Patel', email:'vikram@demo.com', phone:'+91 70000 11223', age:35, gender:'Male', fitnessGoal:'Improve Endurance', membershipPlan:'Pro', experienceLevel:'Advanced', membershipStatus:'active', createdAt:'2025-12-05' },
+  { _id:'m6', memberId:'IGF-DEMO-006', firstName:'Anjali', lastName:'Mehta', email:'anjali@demo.com', phone:'+91 80000 44556', age:22, gender:'Female', fitnessGoal:'Weight Loss', membershipPlan:'Starter', experienceLevel:'Beginner', membershipStatus:'pending', createdAt:'2026-03-05' },
+  { _id:'m7', memberId:'IGF-DEMO-007', firstName:'Rohan', lastName:'Kapoor', email:'rohan@demo.com', phone:'+91 95555 66778', age:29, gender:'Male', fitnessGoal:'Muscle Gain', membershipPlan:'Elite', experienceLevel:'Intermediate', membershipStatus:'expired', createdAt:'2025-11-20' },
+  { _id:'m8', memberId:'IGF-DEMO-008', firstName:'Sunita', lastName:'Joshi', email:'sunita@demo.com', phone:'+91 63333 22110', age:31, gender:'Female', fitnessGoal:'Flexibility & Mobility', membershipPlan:'Starter', experienceLevel:'Beginner', membershipStatus:'pending', createdAt:'2026-03-07' },
+];
+
+let allMembers = [...DEMO_MEMBERS];
+let chartsInited = false;
+
+// ── ADMIN LOGIN ──
+function fillAdminDemo() {
+  document.getElementById('adm-email').value = 'admin@ironforge.com';
+  document.getElementById('adm-pass').value = 'Admin@123456';
+}
+
+async function adminLogin() {
+  const email = document.getElementById('adm-email').value.trim();
+  const pass = document.getElementById('adm-pass').value;
+  if(!email||!pass){ showAdmErr('Enter email and password.'); return; }
+
+  // Try real API
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password:pass})
+    });
+    const data = await res.json();
+    if(data.success && data.data.role === 'admin') {
+      localStorage.setItem('igf_admin_token', data.token);
+      launchDashboard();
+      return;
+    }
+  } catch(e) {}
+
+  // Demo fallback
+  if(email === 'admin@ironforge.com' && pass === 'Admin@123456') {
+    localStorage.setItem('igf_admin_demo', '1');
+    launchDashboard();
+  } else {
+    showAdmErr('Invalid credentials. Use the demo credentials.');
+  }
+}
+
+function showAdmErr(msg){ const e=document.getElementById('admin-err'); e.textContent=msg; e.style.display='block'; setTimeout(()=>e.style.display='none',4000); }
+
+function adminLogout(){
+  localStorage.removeItem('igf_admin_token');
+  localStorage.removeItem('igf_admin_demo');
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('admin-login').style.display='flex';
+}
+
+function launchDashboard(){
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  initClock();
+  loadMembers();
+  if(!chartsInited){ initCharts(); chartsInited=true; }
+  renderRecentList();
+  renderGoalBars();
+  renderActivity();
+  renderRevenuePlanBreakdown();
+}
+
+// ── CLOCK ──
+function initClock(){
+  const tick = () => {
+    const n = new Date();
+    document.getElementById('clock').textContent = n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('today-date').textContent = n.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  };
+  tick(); setInterval(tick,1000);
+}
+
+// ── LOAD MEMBERS ──
+async function loadMembers(){
+  try {
+    const token = localStorage.getItem('igf_admin_token');
+    if(token){
+      const res = await fetch(`${API}/members?limit=50`,{headers:{Authorization:'Bearer '+token}});
+      const data = await res.json();
+      if(data.success){ allMembers = data.data; }
+    }
+  } catch(e){}
+  filterMembers();
+  updateKPIs();
+}
+
+function updateKPIs(){
+  const total = allMembers.length;
+  const active = allMembers.filter(m=>m.membershipStatus==='active').length;
+  const pending = allMembers.filter(m=>m.membershipStatus==='pending').length;
+  const prices = {Starter:999,Elite:1999,Pro:3499};
+  const rev = allMembers.reduce((s,m)=>s+(prices[m.membershipPlan]||0),0);
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-active').textContent = active;
+  document.getElementById('kpi-pending').textContent = pending;
+  document.getElementById('pending-badge').textContent = pending;
+  document.getElementById('kpi-rev').textContent = rev >= 100000 ? '₹'+(rev/100000).toFixed(1)+'L' : '₹'+rev.toLocaleString('en-IN');
+  document.getElementById('rev-monthly').textContent = '₹' + rev.toLocaleString('en-IN');
+  document.getElementById('rev-annual').textContent = '₹' + (rev*12).toLocaleString('en-IN');
+}
+
+function filterMembers(){
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const pl = document.getElementById('filter-plan').value;
+  let data = allMembers.filter(m=>{
+    const match = !q || (m.firstName+' '+m.lastName+' '+m.email+' '+m.memberId).toLowerCase().includes(q);
+    const sMatch = !st || m.membershipStatus===st;
+    const pMatch = !pl || m.membershipPlan===pl;
+    return match && sMatch && pMatch;
+  });
+  renderTable(data);
+}
+
+function renderTable(data){
+  const tbody = document.getElementById('members-tbody');
+  tbody.innerHTML = data.map(m=>`
+    <tr>
+      <td>
+        <div class="td-name">${m.firstName} ${m.lastName}</div>
+        <div style="font-size:0.72rem;color:var(--muted)">${m.email}</div>
+      </td>
+      <td class="td-id">${m.memberId||'—'}</td>
+      <td><span class="plan-pill ${m.membershipPlan}">${m.membershipPlan}</span></td>
+      <td style="font-size:0.78rem;color:var(--muted)">${(m.fitnessGoal||'—').substring(0,20)}</td>
+      <td><span class="badge badge-${m.membershipStatus||'pending'}">${(m.membershipStatus||'pending').toUpperCase()}</span></td>
+      <td style="font-size:0.78rem;color:var(--muted)">${m.createdAt ? new Date(m.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="act-btn view" onclick='openModal(${JSON.stringify(m)})'>View</button>
+        ${m.membershipStatus==='pending' ? `<button class="act-btn activate" onclick="activateMember('${m._id}')">Activate</button>` : ''}
+        <button class="act-btn delete" onclick="deleteMember('${m._id}')">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('tbl-footer').textContent = `Showing ${data.length} of ${allMembers.length} members`;
+}
+
+function activateMember(id){
+  const m = allMembers.find(x=>x._id===id);
+  if(!m) return;
+  if(!confirm(`Activate membership for ${m.firstName} ${m.lastName}?`)) return;
+  m.membershipStatus = 'active';
+  filterMembers(); updateKPIs();
+  // API call
+  const token = localStorage.getItem('igf_admin_token');
+  if(token) fetch(`${API}/members/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({membershipStatus:'active'})}).catch(()=>{});
+}
+
+function deleteMember(id){
+  const m = allMembers.find(x=>x._id===id);
+  if(!m) return;
+  if(!confirm(`Remove ${m.firstName} ${m.lastName} from the system?`)) return;
+  allMembers = allMembers.filter(x=>x._id!==id);
+  filterMembers(); updateKPIs();
+  const token = localStorage.getItem('igf_admin_token');
+  if(token) fetch(`${API}/members/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+token}}).catch(()=>{});
+}
+
+// ── MODAL ──
+function openModal(m){
+  document.getElementById('modal-name').textContent = m.firstName+' '+m.lastName;
+  document.getElementById('modal-fields').innerHTML = [
+    ['Member ID', m.memberId||'—'],
+    ['Email', m.email],
+    ['Phone', m.phone||'—'],
+    ['Age / Gender', (m.age||'—')+' / '+(m.gender||'—')],
+    ['Plan', m.membershipPlan],
+    ['Goal', m.fitnessGoal||'—'],
+    ['Experience', m.experienceLevel||'—'],
+    ['Status', (m.membershipStatus||'pending').toUpperCase()],
+    ['Joined', m.createdAt ? new Date(m.createdAt).toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'}) : '—'],
+  ].map(([k,v])=>`<div class="modal-field"><span>${k}</span><span>${v}</span></div>`).join('');
+  document.getElementById('modal-actions').innerHTML = `
+    ${m.membershipStatus==='pending' ? `<button class="act-btn activate" style="padding:8px 16px" onclick="activateMember('${m._id}');closeModal()">✓ Activate</button>` : ''}
+    <button class="act-btn delete" style="padding:8px 16px" onclick="deleteMember('${m._id}');closeModal()">✕ Remove</button>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+// ── RECENT LIST ──
+function renderRecentList(){
+  const recent = [...allMembers].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
+  document.getElementById('recent-list').innerHTML = recent.map(m=>`
+    <div class="activity-item">
+      <div class="act-icon">${m.gender==='Female'?'👩':'👨'}</div>
+      <div>
+        <div class="act-title">${m.firstName} ${m.lastName}</div>
+        <div class="act-meta">${m.membershipPlan} · ${m.fitnessGoal||'—'} · <span class="badge badge-${m.membershipStatus}">${m.membershipStatus}</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── GOAL BARS ──
+function renderGoalBars(){
+  const goals = {};
+  allMembers.forEach(m=>{ goals[m.fitnessGoal] = (goals[m.fitnessGoal]||0)+1; });
+  const sorted = Object.entries(goals).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0]?.[1]||1;
+  document.getElementById('goal-bars').innerHTML = sorted.map(([g,c])=>`
+    <div class="prog-item">
+      <div class="prog-hdr"><span>${g}</span><span>${c}</span></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${(c/max*100).toFixed(0)}%"></div></div>
+    </div>
+  `).join('');
+}
+
+// ── ACTIVITY FEED ──
+function renderActivity(){
+  const events = [
+    {icon:'🆕', title:'New Registration: Sunita Joshi', meta:'Just now · Starter Plan · Pending'},
+    {icon:'✅', title:'Membership Activated: Rahul Sharma', meta:'2 hours ago · Elite Plan'},
+    {icon:'💳', title:'Plan Upgraded: Vikram Patel → Pro', meta:'Today, 09:15 AM'},
+    {icon:'🆕', title:'New Registration: Anjali Mehta', meta:'Today, 08:30 AM · Starter Plan'},
+    {icon:'❌', title:'Membership Expired: Rohan Kapoor', meta:'Yesterday · Elite Plan'},
+    {icon:'✅', title:'Membership Activated: Priya Verma', meta:'Feb 19, 2026 · Starter Plan'},
+    {icon:'🆕', title:'New Registration: Neha Gupta', meta:'Mar 1, 2026 · Elite Plan'},
+    {icon:'💳', title:'Plan Changed: Arjun Singh → Pro', meta:'Jan 12, 2026'},
+  ];
+  document.getElementById('activity-feed').innerHTML = events.map(e=>`
+    <div class="activity-item">
+      <div class="act-icon">${e.icon}</div>
+      <div>
+        <div class="act-title">${e.title}</div>
+        <div class="act-meta">${e.meta}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── REVENUE PLAN BREAKDOWN ──
+function renderRevenuePlanBreakdown(){
+  const prices = {Starter:999,Elite:1999,Pro:3499};
+  const counts = {Starter:0,Elite:0,Pro:0};
+  allMembers.forEach(m=>{ if(counts[m.membershipPlan]!==undefined) counts[m.membershipPlan]++; });
+  const total = Object.entries(counts).reduce((s,[p,c])=>s+prices[p]*c,0)||1;
+  document.getElementById('rev-plan-breakdown').innerHTML = Object.entries(counts).map(([p,c])=>{
+    const rev = prices[p]*c;
+    return `<div class="prog-item">
+      <div class="prog-hdr">
+        <span><span class="plan-pill ${p}" style="margin-right:6px">${p}</span> ${c} members</span>
+        <span>₹${rev.toLocaleString('en-IN')}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${(rev/total*100).toFixed(0)}%;background:${p==='Starter'?'#666':p==='Elite'?'var(--orange)':'var(--gold)'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHARTS ──
+function initCharts(){
+  const gridColor = '#1c1c1c';
+  const tickColor = '#555';
+
+  // Growth chart
+  new Chart(document.getElementById('growthChart'),{
+    type:'line',
+    data:{
+      labels:['Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets:[
+        {label:'Total',data:[195,210,215,228,235,247],borderColor:'#ff5c00',backgroundColor:'rgba(255,92,0,0.05)',tension:0.4,fill:true,pointBackgroundColor:'#ff5c00',pointRadius:4},
+        {label:'Active',data:[160,175,178,185,192,198],borderColor:'#22c55e',backgroundColor:'transparent',tension:0.4,borderDash:[4,3],pointBackgroundColor:'#22c55e',pointRadius:3},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#555',font:{size:11}}}},
+      scales:{x:{grid:{color:gridColor},ticks:{color:tickColor}},y:{grid:{color:gridColor},ticks:{color:tickColor}}}
+    }
+  });
+
+  // Plan donut
+  new Chart(document.getElementById('planChart'),{
+    type:'doughnut',
+    data:{
+      labels:['Starter','Elite','Pro'],
+      datasets:[{data:[89,112,46],backgroundColor:['#3a3a3a','#ff5c00','#c8a84b'],borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{color:'#777',font:{size:11},padding:12}}}
+    }
+  });
+
+  // Revenue chart
+  new Chart(document.getElementById('revenueChart'),{
+    type:'bar',
+    data:{
+      labels:['Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets:[{
+        label:'Revenue (₹)',
+        data:[312000,345000,358000,298000,378000,363000,392000],
+        backgroundColor:'rgba(255,92,0,0.7)',borderRadius:3,borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:gridColor},ticks:{color:tickColor}},
+        y:{grid:{color:gridColor},ticks:{color:tickColor,callback:v=>'₹'+(v/1000).toFixed(0)+'K'}}
+      }
+    }
+  });
+
+  // Registrations chart
+  new Chart(document.getElementById('regChart'),{
+    type:'bar',
+    data:{
+      labels:['Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets:[{label:'Registrations',data:[18,22,19,14,24,21,28],backgroundColor:'rgba(200,168,75,0.7)',borderRadius:3}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:gridColor},ticks:{color:tickColor}},y:{grid:{color:gridColor},ticks:{color:tickColor},beginAtZero:true}}
+    }
+  });
+
+  // Level doughnut
+  new Chart(document.getElementById('levelChart'),{
+    type:'doughnut',
+    data:{
+      labels:['Beginner','Intermediate','Advanced'],
+      datasets:[{data:[118,89,40],backgroundColor:['#3b82f6','#ff5c00','#c8a84b'],borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{color:'#777',font:{size:11},padding:12}}}
+    }
+  });
+
+  // Gender pie
+  new Chart(document.getElementById('genderChart'),{
+    type:'pie',
+    data:{
+      labels:['Male','Female','Other'],
+      datasets:[{data:[148,94,5],backgroundColor:['#3b82f6','#f472b6','#a78bfa'],borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#777',font:{size:11}}}}
+    }
+  });
+
+  // Status pie
+  new Chart(document.getElementById('statusChart'),{
+    type:'pie',
+    data:{
+      labels:['Active','Pending','Expired'],
+      datasets:[{data:[198,3,46],backgroundColor:['#22c55e','#f59e0b','#ef4444'],borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#777',font:{size:11}}}}
+    }
+  });
+}
+
+// ── PAGE NAV ──
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes(name)) n.classList.add('active'); });
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  if(name==='revenue'||name==='analytics') renderRevenuePlanBreakdown();
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// ── AUTO LOGIN ──
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('igf_admin_token')||localStorage.getItem('igf_admin_demo')){
+    launchDashboard();
+  }
+});
+</script>
+</body>
+</html>

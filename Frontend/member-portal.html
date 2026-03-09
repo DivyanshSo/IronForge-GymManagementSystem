@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronForge — Member Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --black: #080808;
+  --dark: #111;
+  --card: #161616;
+  --card2: #1c1c1c;
+  --border: #262626;
+  --orange: #ff5c00;
+  --orange2: #ff7a2e;
+  --gold: #c8a84b;
+  --white: #f2ede4;
+  --muted: #777;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--black); color:var(--white); font-family:'Barlow',sans-serif; min-height:100vh; }
+
+/* ── AUTH SCREEN ── */
+#auth-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at 60% 40%, rgba(255,92,0,0.08) 0%, transparent 60%),
+              linear-gradient(135deg, #080808 0%, #120800 50%, #080808 100%);
+  position:relative; overflow:hidden;
+}
+.auth-bg-text {
+  position:absolute; font-family:'Bebas Neue',sans-serif;
+  font-size:30vw; color:rgba(255,92,0,0.03); letter-spacing:10px;
+  pointer-events:none; user-select:none; white-space:nowrap;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+.auth-box {
+  width:100%; max-width:440px; padding:0 1.5rem;
+  position:relative; z-index:2;
+  animation: fadeUp 0.6s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.auth-logo {
+  text-align:center; margin-bottom:2.5rem;
+}
+.auth-logo a {
+  font-family:'Bebas Neue',sans-serif; font-size:2.8rem;
+  letter-spacing:4px; color:var(--orange); text-decoration:none;
+}
+.auth-logo a span { color:var(--white); }
+.auth-logo p {
+  font-family:'Barlow Condensed',sans-serif; font-size:0.7rem;
+  letter-spacing:4px; color:var(--muted); text-transform:uppercase; margin-top:4px;
+}
+.auth-card {
+  background:var(--card); border:1px solid var(--border); padding:2.5rem;
+}
+.auth-tabs { display:flex; margin-bottom:2rem; border-bottom:1px solid var(--border); }
+.auth-tab {
+  flex:1; padding:12px; background:none; border:none;
+  font-family:'Barlow Condensed',sans-serif; font-size:0.85rem;
+  font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;
+  margin-bottom:-1px; transition:all 0.2s;
+}
+.auth-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:1.2rem; }
+.form-group label {
+  font-family:'Barlow Condensed',sans-serif; font-size:0.7rem;
+  letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+}
+.form-group input, .form-group select {
+  background:var(--dark); border:1px solid var(--border); color:var(--white);
+  padding:12px 14px; font-family:'Barlow',sans-serif; font-size:0.9rem;
+  outline:none; transition:border-color 0.2s; width:100%;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--orange); }
+.form-group input::placeholder { color:#333; }
+.auth-btn {
+  width:100%; padding:14px; background:var(--orange); border:none;
+  color:var(--black); font-family:'Barlow Condensed',sans-serif;
+  font-size:1rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  cursor:pointer; transition:background 0.2s; margin-top:0.5rem;
+}
+.auth-btn:hover { background:var(--orange2); }
+.auth-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.auth-error {
+  background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+  color:#ff8080; padding:10px 14px; font-size:0.82rem; margin-bottom:1rem; display:none;
+}
+.auth-success {
+  background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3);
+  color:#6ee7a0; padding:10px 14px; font-size:0.82rem; margin-bottom:1rem; display:none;
+}
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.demo-hint {
+  text-align:center; margin-top:1.2rem;
+  font-size:0.75rem; color:var(--muted);
+}
+.demo-hint span { color:var(--orange); cursor:pointer; }
+.demo-hint span:hover { text-decoration:underline; }
+
+/* ── PORTAL LAYOUT ── */
+#portal { display:none; min-height:100vh; }
+
+/* Sidebar */
+.sidebar {
+  position:fixed; top:0; left:0; bottom:0; width:240px;
+  background:var(--dark); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:100; padding:0;
+  transition: transform 0.3s;
+}
+.sidebar-logo {
+  padding:1.5rem 1.5rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-logo a {
+  font-family:'Bebas Neue',sans-serif; font-size:1.8rem;
+  letter-spacing:3px; color:var(--orange); text-decoration:none;
+}
+.sidebar-logo a span { color:var(--white); }
+.sidebar-logo p { font-size:0.7rem; color:var(--muted); margin-top:2px; letter-spacing:1px; }
+.sidebar-nav { flex:1; padding:1.5rem 0; overflow-y:auto; }
+.nav-section-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:0.6rem;
+  letter-spacing:3px; text-transform:uppercase; color:#444;
+  padding:0 1.5rem; margin:1rem 0 0.5rem;
+}
+.nav-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 1.5rem; cursor:pointer; transition:all 0.2s;
+  font-family:'Barlow Condensed',sans-serif; font-size:0.9rem;
+  font-weight:600; letter-spacing:1px; color:var(--muted);
+  border-left:3px solid transparent; text-decoration:none;
+}
+.nav-item:hover { color:var(--white); background:rgba(255,255,255,0.03); }
+.nav-item.active { color:var(--orange); border-left-color:var(--orange); background:rgba(255,92,0,0.06); }
+.nav-item .icon { font-size:1.1rem; width:22px; text-align:center; }
+.sidebar-footer {
+  padding:1rem 1.5rem; border-top:1px solid var(--border);
+}
+.sidebar-user { display:flex; align-items:center; gap:10px; margin-bottom:0.8rem; }
+.user-avatar {
+  width:36px; height:36px; background:var(--orange);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--black);
+  flex-shrink:0;
+}
+.user-name { font-size:0.85rem; font-weight:600; }
+.user-plan { font-size:0.7rem; color:var(--muted); }
+.logout-btn {
+  width:100%; padding:8px; background:none; border:1px solid var(--border);
+  color:var(--muted); font-family:'Barlow Condensed',sans-serif;
+  font-size:0.75rem; letter-spacing:2px; text-transform:uppercase;
+  cursor:pointer; transition:all 0.2s;
+}
+.logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* Main content */
+.main-content {
+  margin-left:240px; padding:2rem 2.5rem; min-height:100vh;
+  background:var(--black);
+}
+.page { display:none; }
+.page.active { display:block; animation:fadeUp 0.4s ease; }
+.page-header { margin-bottom:2rem; }
+.page-title {
+  font-family:'Bebas Neue',sans-serif; font-size:2.5rem;
+  letter-spacing:3px; line-height:1;
+}
+.page-title span { color:var(--orange); }
+.page-sub { color:var(--muted); font-size:0.9rem; margin-top:4px; }
+
+/* Stat Cards */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; margin-bottom:2rem; }
+.stat-card {
+  background:var(--card); border:1px solid var(--border); padding:1.5rem;
+  position:relative; overflow:hidden; transition:border-color 0.3s;
+}
+.stat-card:hover { border-color:var(--orange); }
+.stat-card::after {
+  content:''; position:absolute; top:0; right:0;
+  width:60px; height:60px;
+  background:radial-gradient(circle, rgba(255,92,0,0.08) 0%, transparent 70%);
+}
+.stat-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:0.65rem;
+  letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+}
+.stat-val {
+  font-family:'Bebas Neue',sans-serif; font-size:2.5rem;
+  color:var(--white); line-height:1;
+}
+.stat-val.orange { color:var(--orange); }
+.stat-val.green { color:var(--green); }
+.stat-val.gold { color:var(--gold); }
+.stat-icon { font-size:1.8rem; margin-bottom:8px; }
+.stat-change { font-size:0.75rem; color:var(--muted); margin-top:6px; }
+.stat-change.up { color:var(--green); }
+
+/* Cards */
+.card {
+  background:var(--card); border:1px solid var(--border); padding:1.5rem;
+  margin-bottom:1.5rem;
+}
+.card-title {
+  font-family:'Barlow Condensed',sans-serif; font-size:0.75rem;
+  letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+  margin-bottom:1.2rem; display:flex; align-items:center; justify-content:space-between;
+}
+.card-title span { color:var(--orange); }
+
+/* Grid layouts */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+.three-col { display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; }
+
+/* Member ID badge */
+.member-id-badge {
+  display:inline-block; background:rgba(255,92,0,0.1); border:1px solid rgba(255,92,0,0.3);
+  color:var(--orange); font-family:'Bebas Neue',sans-serif;
+  font-size:1.2rem; letter-spacing:3px; padding:6px 16px;
+}
+
+/* Status badge */
+.badge {
+  display:inline-block; font-family:'Barlow Condensed',sans-serif;
+  font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  padding:4px 10px; border:1px solid;
+}
+.badge-pending { color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.08); }
+.badge-active { color:var(--green); border-color:rgba(34,197,94,0.4); background:rgba(34,197,94,0.08); }
+.badge-expired { color:var(--red); border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.08); }
+
+/* Plan card */
+.plan-detail {
+  background:var(--card2); border:1px solid var(--border); padding:1.2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1rem;
+}
+.plan-name-big {
+  font-family:'Bebas Neue',sans-serif; font-size:2rem;
+  color:var(--orange); letter-spacing:2px;
+}
+.plan-price-big { font-family:'Barlow Condensed',sans-serif; font-size:1rem; color:var(--muted); }
+
+/* Progress ring */
+.ring-wrap { position:relative; width:120px; height:120px; margin:0 auto; }
+.ring-wrap svg { transform:rotate(-90deg); }
+.ring-center {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.ring-val { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:var(--orange); }
+.ring-lbl { font-size:0.65rem; color:var(--muted); letter-spacing:1px; }
+
+/* Workout list */
+.workout-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.workout-item:last-child { border-bottom:none; }
+.workout-icon {
+  width:38px; height:38px; background:rgba(255,92,0,0.1);
+  border:1px solid rgba(255,92,0,0.2); display:flex;
+  align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;
+}
+.workout-name { font-size:0.9rem; font-weight:600; }
+.workout-meta { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+.workout-sets {
+  margin-left:auto; font-family:'Barlow Condensed',sans-serif;
+  font-size:0.85rem; color:var(--orange);
+}
+
+/* Progress bars */
+.progress-item { margin-bottom:1rem; }
+.progress-header { display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem; }
+.progress-header span:last-child { color:var(--orange); }
+.progress-track {
+  height:4px; background:var(--border); position:relative; overflow:hidden;
+}
+.progress-fill {
+  position:absolute; left:0; top:0; bottom:0;
+  background:linear-gradient(90deg, var(--orange), var(--orange2));
+  transition:width 1s ease;
+}
+
+/* Profile form */
+.profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.save-btn {
+  padding:12px 28px; background:var(--orange); border:none;
+  color:var(--black); font-family:'Barlow Condensed',sans-serif;
+  font-size:0.9rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  cursor:pointer; transition:background 0.2s; margin-top:0.5rem;
+}
+.save-btn:hover { background:var(--orange2); }
+
+/* Timeline */
+.timeline { position:relative; padding-left:1.5rem; }
+.timeline::before { content:''; position:absolute; left:6px; top:0; bottom:0; width:1px; background:var(--border); }
+.timeline-item { position:relative; margin-bottom:1.5rem; }
+.timeline-dot {
+  position:absolute; left:-1.5rem; top:4px;
+  width:12px; height:12px; background:var(--orange); border-radius:50%;
+  border:2px solid var(--black);
+}
+.timeline-date { font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+.timeline-text { font-size:0.88rem; }
+
+/* BMI Calculator */
+.bmi-result {
+  text-align:center; padding:1.5rem;
+  background:var(--card2); border:1px solid var(--border); margin-top:1rem;
+  display:none;
+}
+.bmi-number {
+  font-family:'Bebas Neue',sans-serif; font-size:4rem; color:var(--orange); line-height:1;
+}
+.bmi-category { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; letter-spacing:2px; }
+.bmi-tip { font-size:0.82rem; color:var(--muted); margin-top:8px; line-height:1.6; }
+
+/* Chart container */
+.chart-wrap { position:relative; height:220px; }
+
+/* Notification dot */
+.notif { 
+  width:8px; height:8px; background:var(--orange); border-radius:50%;
+  margin-left:auto; flex-shrink:0;
+}
+
+/* Mobile */
+.hamburger-portal {
+  display:none; position:fixed; top:1rem; left:1rem; z-index:200;
+  background:var(--card); border:1px solid var(--border);
+  padding:8px 10px; cursor:pointer; font-size:1.2rem;
+}
+.sidebar-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:99;
+}
+
+@media(max-width:900px){
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .main-content { margin-left:0; padding:1rem; }
+  .hamburger-portal { display:block; }
+  .two-col, .three-col { grid-template-columns:1fr; }
+  .profile-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     AUTH SCREEN
+══════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-bg-text">IGF</div>
+  <div class="auth-box">
+    <div class="auth-logo">
+      <a href="index.html">IRON<span>FORGE</span></a>
+      <p>Member Portal</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="auth-error" id="login-error"></div>
+        <div class="auth-success" id="login-success"></div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="auth-btn" id="login-btn" onclick="doLogin()">ENTER THE FORGE</button>
+        <p class="demo-hint">Demo: <span onclick="fillDemo('member')">Member login</span> &nbsp;|&nbsp; <span onclick="fillDemo('admin')">Admin login</span></p>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="register-form" style="display:none;">
+        <div class="auth-error" id="reg-error"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="reg-fname" placeholder="John">
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="reg-lname" placeholder="Doe">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="reg-email" placeholder="john@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" id="reg-password" placeholder="Min. 8 characters">
+        </div>
+        <div class="form-group">
+          <label>Phone *</label>
+          <input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Goal</label>
+            <select id="reg-goal">
+              <option value="Weight Loss">Weight Loss</option>
+              <option value="Muscle Gain">Muscle Gain</option>
+              <option value="Increase Strength">Increase Strength</option>
+              <option value="Improve Endurance">Improve Endurance</option>
+              <option value="General Health & Fitness">General Fitness</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Plan</label>
+            <select id="reg-plan">
+              <option value="Starter">Starter ₹999</option>
+              <option value="Elite" selected>Elite ₹1,999</option>
+              <option value="Pro">Pro ₹3,499</option>
+            </select>
+          </div>
+        </div>
+        <button class="auth-btn" onclick="doRegister()">CREATE ACCOUNT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MEMBER PORTAL
+══════════════════════════════ -->
+<div id="portal">
+  <button class="hamburger-portal" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html">IRON<span>FORGE</span></a>
+      <p id="sidebar-role-label">Member Portal</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item active" onclick="showPage('overview')" href="#">
+        <span class="icon">📊</span> Overview
+      </a>
+      <a class="nav-item" onclick="showPage('workouts')" href="#">
+        <span class="icon">🏋️</span> My Workouts
+      </a>
+      <a class="nav-item" onclick="showPage('progress')" href="#">
+        <span class="icon">📈</span> Progress
+      </a>
+      <a class="nav-item" onclick="showPage('bmi')" href="#">
+        <span class="icon">⚖️</span> BMI Calculator
+      </a>
+      <div class="nav-section-label">Account</div>
+      <a class="nav-item" onclick="showPage('membership')" href="#">
+        <span class="icon">💳</span> Membership
+      </a>
+      <a class="nav-item" onclick="showPage('profile')" href="#">
+        <span class="icon">👤</span> Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebar-avatar">R</div>
+        <div>
+          <div class="user-name" id="sidebar-name">Member</div>
+          <div class="user-plan" id="sidebar-plan">Elite Plan</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">⏻ Logout</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-title">WELCOME BACK, <span id="hero-name">MEMBER</span></div>
+        <div class="page-sub" id="hero-sub">Here's your fitness summary for today</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-label">Days Active</div>
+          <div class="stat-val orange" id="stat-days">24</div>
+          <div class="stat-change up">↑ This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💪</div>
+          <div class="stat-label">Workouts Done</div>
+          <div class="stat-val" id="stat-workouts">18</div>
+          <div class="stat-change up">↑ 3 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-label">Current Streak</div>
+          <div class="stat-val green">5 <span style="font-size:1rem">days</span></div>
+          <div class="stat-change up">↑ Personal best</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">Membership</div>
+          <div class="stat-val gold" id="stat-plan">Elite</div>
+          <div class="stat-change" id="stat-status">Pending Activation</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Weekly Activity <span>This Week</span></div>
+          <div class="chart-wrap">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Workout Split <span>Last 30 days</span></div>
+          <div class="chart-wrap">
+            <canvas id="splitChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Upcoming Schedule <span>This Week</span></div>
+        <div id="schedule-list"></div>
+      </div>
+    </div>
+
+    <!-- WORKOUTS PAGE -->
+    <div class="page" id="page-workouts">
+      <div class="page-header">
+        <div class="page-title">MY <span>WORKOUTS</span></div>
+        <div class="page-sub">Recommended exercises based on your goal</div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card">
+          <div class="stat-label">Goal</div>
+          <div class="stat-val orange" id="workout-goal-display" style="font-size:1.5rem">Muscle Gain</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Level</div>
+          <div class="stat-val" id="workout-level-display" style="font-size:1.5rem">Intermediate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Weekly Target</div>
+          <div class="stat-val green" style="font-size:1.5rem">4 <span style="font-size:1rem">days</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recommended Exercises <span id="exercise-count">12 exercises</span></div>
+        <div id="workout-list"></div>
+      </div>
+    </div>
+
+    <!-- PROGRESS PAGE -->
+    <div class="page" id="page-progress">
+      <div class="page-header">
+        <div class="page-title">MY <span>PROGRESS</span></div>
+        <div class="page-sub">Track your fitness journey over time</div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Weight History <span>kg</span></div>
+          <div class="chart-wrap">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Goal Completion <span>%</span></div>
+          <div style="padding:1rem 0;">
+            <div class="progress-item">
+              <div class="progress-header"><span>Strength</span><span>72%</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:72%"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Cardio Endurance</span><span>58%</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:58%"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Flexibility</span><span>40%</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:40%"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Consistency</span><span>85%</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:85%"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Overall Fitness</span><span>64%</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:64%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monthly Workout Volume <span>Sessions per month</span></div>
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Activity Timeline <span>Recent</span></div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </div>
+
+    <!-- BMI PAGE -->
+    <div class="page" id="page-bmi">
+      <div class="page-header">
+        <div class="page-title">BMI <span>CALCULATOR</span></div>
+        <div class="page-sub">Know your body composition and get personalized advice</div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Enter Your Details</div>
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="bmi-height" placeholder="175" min="100" max="250">
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="bmi-weight" placeholder="75" min="30" max="300">
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="bmi-age" placeholder="25" min="15" max="80">
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="bmi-gender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <button class="save-btn" onclick="calcBMI()">CALCULATE BMI</button>
+          <div class="bmi-result" id="bmi-result">
+            <div class="bmi-number" id="bmi-val">0.0</div>
+            <div class="bmi-category" id="bmi-cat">—</div>
+            <div class="bmi-tip" id="bmi-tip"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">BMI Scale</div>
+          <div style="padding:1rem 0">
+            <div class="progress-item">
+              <div class="progress-header"><span>Underweight</span><span style="color:#60a5fa">Below 18.5</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:20%;background:#60a5fa"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Normal Weight</span><span style="color:var(--green)">18.5 – 24.9</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:50%;background:var(--green)"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Overweight</span><span style="color:#f59e0b">25 – 29.9</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:70%;background:#f59e0b"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header"><span>Obese</span><span style="color:var(--red)">30 and above</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:90%;background:var(--red)"></div></div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-top:1rem">Ideal Weight Range</div>
+          <div id="ideal-weight" style="font-size:0.85rem;color:var(--muted);line-height:1.8">
+            Enter your height to calculate ideal weight range.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERSHIP PAGE -->
+    <div class="page" id="page-membership">
+      <div class="page-header">
+        <div class="page-title">MY <span>MEMBERSHIP</span></div>
+        <div class="page-sub">Manage your plan and view details</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Current Plan</div>
+        <div class="plan-detail">
+          <div>
+            <div class="plan-name-big" id="mem-plan-name">Elite</div>
+            <div class="plan-price-big" id="mem-plan-price">₹1,999 / month</div>
+          </div>
+          <div class="badge badge-pending" id="mem-status-badge">PENDING</div>
+        </div>
+        <div id="plan-features-list" style="margin-bottom:1rem"></div>
+        <div class="card-title">Member ID</div>
+        <div class="member-id-badge" id="mem-id-display">IGF-DEMO-0001</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Upgrade Plan</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
+          <div class="plan-detail" style="flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer" onclick="selectUpgrade('Starter')">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--muted)">Starter</div>
+            <div style="color:var(--muted);font-size:0.85rem">₹999/month</div>
+          </div>
+          <div class="plan-detail" style="flex-direction:column;align-items:flex-start;gap:6px;border-color:var(--orange);cursor:pointer" onclick="selectUpgrade('Elite')">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--orange)">Elite</div>
+            <div style="color:var(--muted);font-size:0.85rem">₹1,999/month</div>
+          </div>
+          <div class="plan-detail" style="flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer" onclick="selectUpgrade('Pro')">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold)">Pro</div>
+            <div style="color:var(--muted);font-size:0.85rem">₹3,499/month</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="page-profile">
+      <div class="page-header">
+        <div class="page-title">MY <span>PROFILE</span></div>
+        <div class="page-sub">Update your personal information</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Personal Details</div>
+        <div class="profile-grid">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="prof-fname">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="prof-lname">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="prof-email">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="prof-phone">
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="prof-age">
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="prof-gender">
+              <option>Male</option><option>Female</option>
+              <option>Non-binary</option><option>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Fitness Goal</label>
+          <select id="prof-goal">
+            <option>Weight Loss</option><option>Muscle Gain</option>
+            <option>Increase Strength</option><option>Improve Endurance</option>
+            <option>Flexibility &amp; Mobility</option><option>General Health &amp; Fitness</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Experience Level</label>
+          <select id="prof-level">
+            <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+          </select>
+        </div>
+        <button class="save-btn" onclick="saveProfile()">SAVE CHANGES</button>
+        <div id="profile-msg" style="display:none;margin-top:10px;font-size:0.82rem;color:var(--green)">✓ Profile updated successfully</div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /portal -->
+
+<script>
+const API = 'http://localhost:5000/api';
+
+// ── DEMO USERS (when backend is offline) ──
+const DEMO_USERS = {
+  'member@demo.com': {
+    password: 'demo1234',
+    data: {
+      _id: 'demo001', memberId: 'IGF-DEMO-MBR1',
+      firstName: 'Rahul', lastName: 'Sharma',
+      email: 'member@demo.com', phone: '+91 98765 43210',
+      age: 26, gender: 'Male',
+      fitnessGoal: 'Muscle Gain', membershipPlan: 'Elite',
+      experienceLevel: 'Intermediate',
+      membershipStatus: 'active', role: 'member',
+    }
+  },
+};
+
+let currentUser = null;
+
+// ── AUTH TAB SWITCH ──
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && tab==='login')||(i===1 && tab==='register')));
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+}
+
+function fillDemo(type) {
+  if(type === 'member') {
+    document.getElementById('login-email').value = 'member@demo.com';
+    document.getElementById('login-password').value = 'demo1234';
+  } else {
+    document.getElementById('login-email').value = 'admin@demo.com';
+    document.getElementById('login-password').value = 'admin1234';
+    showErr('login-error','Admin dashboard is on admin.html — this portal is for members.');
+    return;
+  }
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 5000);
+}
+function showSucc(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  if(!email || !password) { showErr('login-error','Please enter email and password.'); return; }
+
+  btn.textContent = 'LOADING...'; btn.disabled = true;
+
+  // Try real API first
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if(data.success) {
+      localStorage.setItem('igf_token', data.token);
+      localStorage.setItem('igf_user', JSON.stringify(data.data));
+      currentUser = data.data;
+      launchPortal();
+      return;
+    } else {
+      // Fall through to demo
+    }
+  } catch(e) { /* backend offline, try demo */ }
+
+  // Demo fallback
+  const demo = DEMO_USERS[email];
+  if(demo && demo.password === password) {
+    currentUser = demo.data;
+    localStorage.setItem('igf_user', JSON.stringify(currentUser));
+    launchPortal();
+    return;
+  }
+
+  showErr('login-error', 'Invalid credentials. Try the demo login.');
+  btn.textContent = 'ENTER THE FORGE'; btn.disabled = false;
+}
+
+// ── REGISTER ──
+async function doRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const phone = document.getElementById('reg-phone').value.trim();
+  const goal = document.getElementById('reg-goal').value;
+  const plan = document.getElementById('reg-plan').value;
+  if(!fname||!lname||!email||!password||!phone) { showErr('reg-error','Please fill all required fields.'); return; }
+  if(password.length < 8) { showErr('reg-error','Password must be at least 8 characters.'); return; }
+
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ firstName:fname, lastName:lname, email, password, phone, fitnessGoal:goal, membershipPlan:plan }),
+    });
+    const data = await res.json();
+    if(data.success) {
+      localStorage.setItem('igf_token', data.token);
+      currentUser = data.data;
+      launchPortal();
+    } else {
+      showErr('reg-error', data.message || 'Registration failed.');
+    }
+  } catch(e) {
+    // Demo mode: create local user
+    currentUser = {
+      _id:'local_'+Date.now(), memberId:'IGF-NEW-'+Math.random().toString(36).substr(2,4).toUpperCase(),
+      firstName:fname, lastName:lname, email, phone,
+      fitnessGoal:goal, membershipPlan:plan, experienceLevel:'Beginner',
+      membershipStatus:'pending', role:'member',
+    };
+    localStorage.setItem('igf_user', JSON.stringify(currentUser));
+    launchPortal();
+  }
+}
+
+// ── LAUNCH PORTAL ──
+function launchPortal() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('portal').style.display = 'block';
+  populatePortal();
+  initCharts();
+  renderWorkouts();
+  renderTimeline();
+  renderSchedule();
+}
+
+function doLogout() {
+  localStorage.removeItem('igf_token');
+  localStorage.removeItem('igf_user');
+  currentUser = null;
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+// ── POPULATE PORTAL WITH USER DATA ──
+function populatePortal() {
+  const u = currentUser;
+  const initials = (u.firstName[0] + (u.lastName?u.lastName[0]:'')).toUpperCase();
+  document.getElementById('sidebar-avatar').textContent = initials;
+  document.getElementById('sidebar-name').textContent = u.firstName + ' ' + (u.lastName||'');
+  document.getElementById('sidebar-plan').textContent = (u.membershipPlan||'Starter') + ' Plan';
+  document.getElementById('hero-name').textContent = u.firstName.toUpperCase();
+  document.getElementById('hero-sub').textContent = `${u.fitnessGoal || 'Fitness'} journey · ${u.experienceLevel || 'Beginner'} level`;
+  document.getElementById('stat-plan').textContent = u.membershipPlan || 'Starter';
+  document.getElementById('stat-status').textContent = u.membershipStatus === 'active' ? '✓ Active' : '⏳ Pending';
+
+  // Workout page
+  document.getElementById('workout-goal-display').textContent = u.fitnessGoal || 'General Fitness';
+  document.getElementById('workout-level-display').textContent = u.experienceLevel || 'Beginner';
+
+  // Membership page
+  const prices = { Starter:'₹999', Elite:'₹1,999', Pro:'₹3,499' };
+  document.getElementById('mem-plan-name').textContent = u.membershipPlan || 'Starter';
+  document.getElementById('mem-plan-price').textContent = (prices[u.membershipPlan]||'₹999') + ' / month';
+  document.getElementById('mem-id-display').textContent = u.memberId || 'IGF-PENDING';
+  const sb = document.getElementById('mem-status-badge');
+  sb.textContent = (u.membershipStatus||'pending').toUpperCase();
+  sb.className = 'badge badge-' + (u.membershipStatus||'pending');
+
+  // Plan features
+  const features = {
+    Starter: ['Gym floor access','Basic equipment','Locker room'],
+    Elite: ['All equipment','Unlimited classes','2 PT sessions/month','Locker room'],
+    Pro: ['All equipment + Sauna','Unlimited classes','8 PT sessions/month','Diet consultation','Towel service'],
+  };
+  const fl = document.getElementById('plan-features-list');
+  fl.innerHTML = (features[u.membershipPlan]||features.Starter).map(f =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.85rem;color:var(--muted)">
+      <span style="color:var(--orange)">→</span> ${f}
+    </div>`
+  ).join('');
+
+  // Profile form
+  document.getElementById('prof-fname').value = u.firstName || '';
+  document.getElementById('prof-lname').value = u.lastName || '';
+  document.getElementById('prof-email').value = u.email || '';
+  document.getElementById('prof-phone').value = u.phone || '';
+  document.getElementById('prof-age').value = u.age || '';
+  document.getElementById('prof-gender').value = u.gender || 'Male';
+  document.getElementById('prof-goal').value = u.fitnessGoal || 'General Health & Fitness';
+  document.getElementById('prof-level').value = u.experienceLevel || 'Beginner';
+}
+
+// ── CHARTS ──
+let chartsInited = false;
+function initCharts() {
+  if(chartsInited) return;
+  chartsInited = true;
+  const co = { color:'#f2ede4', borderColor:'#262626' };
+
+  // Activity chart
+  new Chart(document.getElementById('activityChart'), {
+    type:'bar',
+    data: {
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{
+        label:'Minutes',
+        data:[60,45,0,75,55,90,0],
+        backgroundColor:'rgba(255,92,0,0.7)',
+        borderRadius:3, borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'} },
+        y:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'} }
+      }
+    }
+  });
+
+  // Split donut chart
+  new Chart(document.getElementById('splitChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Chest','Back','Legs','Shoulders','Arms','Core'],
+      datasets:[{
+        data:[22,20,18,15,15,10],
+        backgroundColor:['#ff5c00','#ff7a2e','#c8a84b','#3b82f6','#22c55e','#8b5cf6'],
+        borderWidth:0,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'65%',
+      plugins:{ legend:{ position:'right', labels:{ color:'#777', font:{size:11} } } }
+    }
+  });
+
+  // Weight chart
+  new Chart(document.getElementById('weightChart'), {
+    type:'line',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets:[{
+        label:'Weight (kg)',
+        data:[82,80.5,79,78,77.2,76.5],
+        borderColor:'#ff5c00', backgroundColor:'rgba(255,92,0,0.08)',
+        tension:0.4, fill:true, pointBackgroundColor:'#ff5c00', pointRadius:4,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'} },
+        y:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'} }
+      }
+    }
+  });
+
+  // Volume bar chart
+  new Chart(document.getElementById('volumeChart'), {
+    type:'bar',
+    data:{
+      labels:['Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets:[{
+        label:'Sessions',
+        data:[10,13,11,8,15,14,18],
+        backgroundColor:'rgba(200,168,75,0.7)',
+        borderRadius:3,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'} },
+        y:{ grid:{color:'#1a1a1a'}, ticks:{color:'#666'}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+// ── WORKOUT DATA ──
+const allWorkouts = [
+  { icon:'🏋️', name:'Barbell Bench Press', meta:'Chest · Compound', sets:'4 × 8–10 reps', goal:['Muscle Gain','Increase Strength'] },
+  { icon:'💪', name:'Pull-Ups', meta:'Back · Bodyweight', sets:'4 × max reps', goal:['Muscle Gain','Increase Strength','General Health & Fitness'] },
+  { icon:'🦵', name:'Barbell Back Squat', meta:'Legs · Compound', sets:'4 × 8 reps', goal:['Muscle Gain','Increase Strength','Weight Loss'] },
+  { icon:'🔥', name:'Deadlift', meta:'Full Body · Compound', sets:'4 × 5–6 reps', goal:['Muscle Gain','Increase Strength'] },
+  { icon:'🏃', name:'HIIT Sprints', meta:'Cardio · High Intensity', sets:'8 × 20s sprint / 40s rest', goal:['Weight Loss','Improve Endurance'] },
+  { icon:'⚡', name:'Overhead Press', meta:'Shoulders · Compound', sets:'4 × 8 reps', goal:['Muscle Gain','Increase Strength'] },
+  { icon:'🤸', name:'Dumbbell Row', meta:'Back · Compound', sets:'3 × 12 each side', goal:['Muscle Gain','General Health & Fitness'] },
+  { icon:'💥', name:'Romanian Deadlift', meta:'Hamstrings · Hip Hinge', sets:'4 × 10 reps', goal:['Muscle Gain','Increase Strength'] },
+  { icon:'🏅', name:'Plank', meta:'Core · Isometric', sets:'3 × 60 sec', goal:['General Health & Fitness','Weight Loss','Increase Strength'] },
+  { icon:'🚴', name:'Cycling (Stationary)', meta:'Cardio · Low Impact', sets:'30 min steady state', goal:['Weight Loss','Improve Endurance'] },
+  { icon:'🤾', name:'Burpees', meta:'Full Body · HIIT', sets:'4 × 15 reps', goal:['Weight Loss','Improve Endurance','General Health & Fitness'] },
+  { icon:'🧘', name:'Yoga Flow', meta:'Flexibility · Recovery', sets:'10 rounds morning', goal:['Flexibility & Mobility','General Health & Fitness'] },
+];
+
+function renderWorkouts() {
+  const goal = currentUser?.fitnessGoal || 'General Health & Fitness';
+  const filtered = allWorkouts.filter(w => w.goal.includes(goal));
+  document.getElementById('exercise-count').textContent = filtered.length + ' exercises';
+  document.getElementById('workout-list').innerHTML = filtered.map(w => `
+    <div class="workout-item">
+      <div class="workout-icon">${w.icon}</div>
+      <div>
+        <div class="workout-name">${w.name}</div>
+        <div class="workout-meta">${w.meta}</div>
+      </div>
+      <div class="workout-sets">${w.sets}</div>
+    </div>
+  `).join('');
+}
+
+// ── SCHEDULE ──
+function renderSchedule() {
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const classes = [
+    { day:'Monday', name:'Chest & Triceps', time:'7:00 AM', trainer:'Vikram S.' },
+    { day:'Wednesday', name:'Back & Biceps', time:'6:30 AM', trainer:'Priya M.' },
+    { day:'Friday', name:'Legs & Shoulders', time:'7:00 AM', trainer:'Arjun K.' },
+    { day:'Saturday', name:'HIIT Cardio', time:'8:00 AM', trainer:'Neha R.' },
+  ];
+  document.getElementById('schedule-list').innerHTML = classes.map(c => `
+    <div class="workout-item">
+      <div class="workout-icon">📅</div>
+      <div>
+        <div class="workout-name">${c.name}</div>
+        <div class="workout-meta">${c.day} · ${c.time} · Trainer: ${c.trainer}</div>
+      </div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:var(--orange);margin-left:auto">${c.time}</span>
+    </div>
+  `).join('');
+}
+
+// ── TIMELINE ──
+function renderTimeline() {
+  const events = [
+    { date:'Today, 7:02 AM', text:'Completed Chest & Triceps — 65 min session' },
+    { date:'Yesterday, 6:45 AM', text:'Completed Back & Biceps — 55 min session' },
+    { date:'Mar 5, 2026', text:'Body weight recorded: 76.5 kg' },
+    { date:'Mar 3, 2026', text:'Completed Legs Day — Personal best on squat: 100kg' },
+    { date:'Mar 1, 2026', text:'Membership renewed — Elite Plan activated' },
+    { date:'Feb 27, 2026', text:'Completed HIIT Cardio class with Neha R.' },
+  ];
+  document.getElementById('timeline').innerHTML = events.map(e => `
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">${e.date}</div>
+      <div class="timeline-text">${e.text}</div>
+    </div>
+  `).join('');
+}
+
+// ── BMI CALCULATOR ──
+function calcBMI() {
+  const h = parseFloat(document.getElementById('bmi-height').value);
+  const w = parseFloat(document.getElementById('bmi-weight').value);
+  const age = parseInt(document.getElementById('bmi-age').value) || 25;
+  if(!h || !w || h<100 || w<20) { alert('Please enter valid height and weight.'); return; }
+  const bmi = (w / ((h/100) ** 2)).toFixed(1);
+  let cat, tip, color;
+  if(bmi < 18.5) { cat='UNDERWEIGHT'; color='#60a5fa'; tip='Focus on caloric surplus with nutrient-dense foods. Prioritize compound lifts and resistance training to build lean mass.'; }
+  else if(bmi < 25) { cat='NORMAL WEIGHT'; color='var(--green)'; tip='Excellent! Maintain your routine with a balanced mix of strength training and cardio. Focus on performance goals.'; }
+  else if(bmi < 30) { cat='OVERWEIGHT'; color='#f59e0b'; tip='Combine moderate caloric deficit with strength training and cardio. Aim for 0.5–1 kg weight loss per week.'; }
+  else { cat='OBESE'; color='var(--red)'; tip='Consult a doctor before starting. Begin with low-impact cardio and bodyweight exercises. Gradual progress is key.'; }
+
+  const res = document.getElementById('bmi-result');
+  res.style.display = 'block';
+  document.getElementById('bmi-val').textContent = bmi;
+  document.getElementById('bmi-val').style.color = color;
+  document.getElementById('bmi-cat').textContent = cat;
+  document.getElementById('bmi-cat').style.color = color;
+  document.getElementById('bmi-tip').textContent = tip;
+
+  const minW = (18.5 * (h/100)**2).toFixed(1);
+  const maxW = (24.9 * (h/100)**2).toFixed(1);
+  document.getElementById('ideal-weight').innerHTML =
+    `For your height of <strong>${h}cm</strong>:<br>
+     Ideal weight range: <strong style="color:var(--green)">${minW} – ${maxW} kg</strong><br>
+     Your current weight: <strong style="color:var(--orange)">${w} kg</strong><br>
+     ${w < minW ? `<span style="color:#60a5fa">You are ${(minW-w).toFixed(1)}kg below ideal range</span>` :
+       w > maxW ? `<span style="color:#f59e0b">You are ${(w-maxW).toFixed(1)}kg above ideal range</span>` :
+       '<span style="color:var(--green)">✓ You are in the ideal weight range!</span>'}`;
+}
+
+// ── SAVE PROFILE ──
+function saveProfile() {
+  if(!currentUser) return;
+  currentUser.firstName = document.getElementById('prof-fname').value;
+  currentUser.lastName = document.getElementById('prof-lname').value;
+  currentUser.phone = document.getElementById('prof-phone').value;
+  currentUser.age = document.getElementById('prof-age').value;
+  currentUser.gender = document.getElementById('prof-gender').value;
+  currentUser.fitnessGoal = document.getElementById('prof-goal').value;
+  currentUser.experienceLevel = document.getElementById('prof-level').value;
+  localStorage.setItem('igf_user', JSON.stringify(currentUser));
+
+  // Re-populate sidebar
+  document.getElementById('sidebar-name').textContent = currentUser.firstName + ' ' + (currentUser.lastName||'');
+  document.getElementById('sidebar-avatar').textContent = (currentUser.firstName[0] + (currentUser.lastName?.[0]||'')).toUpperCase();
+
+  const msg = document.getElementById('profile-msg');
+  msg.style.display = 'block';
+  setTimeout(()=>{ msg.style.display='none'; }, 3000);
+
+  // Try API update
+  const token = localStorage.getItem('igf_token');
+  if(token && currentUser._id) {
+    fetch(`${API}/members/${currentUser._id}`, {
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify(currentUser),
+    }).catch(()=>{});
+  }
+}
+
+// ── UPGRADE PLAN ──
+function selectUpgrade(plan) {
+  if(!currentUser) return;
+  const prices = { Starter:'₹999', Elite:'₹1,999', Pro:'₹3,499' };
+  if(currentUser.membershipPlan === plan) { alert('You are already on the ' + plan + ' plan.'); return; }
+  if(confirm(`Switch to ${plan} plan (${prices[plan]}/month)?`)) {
+    currentUser.membershipPlan = plan;
+    localStorage.setItem('igf_user', JSON.stringify(currentUser));
+    populatePortal();
+    showPage('membership');
+    alert(`Plan updated to ${plan}! Our team will contact you to process the change.`);
+  }
+}
+
+// ── PAGE NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+  });
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ── MOBILE SIDEBAR ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// ── AUTO LOGIN FROM STORAGE ──
+window.addEventListener('load', () => {
+  const stored = localStorage.getItem('igf_user');
+  if(stored) {
+    try {
+      currentUser = JSON.parse(stored);
+      if(currentUser?.role === 'admin') {
+        window.location.href = 'admin.html';
+        return;
+      }
+      launchPortal();
+    } catch(e) { localStorage.clear(); }
+  }
+});
+</script>
+</body>
+</html>
