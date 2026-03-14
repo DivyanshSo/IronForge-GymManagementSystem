@@ -45,6 +45,15 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/members', require('./routes/members'));
 app.use('/api/contact', require('./routes/contact'));
 
+// ── Root Route ──
+app.get('/', (req, res)=> {
+  res.json({
+    success: true,
+    message: '🔥 IronForge Gym Backend Running',
+    api: "http://localhost:5000/api",
+  });
+});
+
 // ── Health Check ──
 app.get('/api/health', (req, res) => {
   res.json({
